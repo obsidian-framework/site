@@ -11,7 +11,7 @@ import java.util.Map;
 @Controller
 public class DocController extends BaseController
 {
-    @GET(value = "/docs")
+    @GET(value = "/docs", name = "doc.home")
     private Object homepage(Request req, Response res)
     {
         return render("docs/home.html", Map.of());

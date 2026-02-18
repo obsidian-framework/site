@@ -1,101 +1,255 @@
 {% extends "view/layout/front.html" %}
 {% block content %}
 {% include "./partials/hero.html" %}
-<div class="mb-16">
-    <h2 class="text-white font-bold mb-6">Stack</h2>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="p-4 bg-zinc-950 border border-zinc-800">
-            <div class="text-xs text-gray-600 mb-1">Framework</div>
-            <div class="text-white">Spark</div>
+{% include "./partials/getting_started.html" %}
+<!-- Code showcase -->
+<div class=" mx-auto px-6 py-16 border-b border-zinc-900">
+    <p class="text-xs text-zinc-600 uppercase tracking-widest mb-8">Code that speaks for itself</p>
+    <div class="grid md:grid-cols-2 gap-8">
+
+        <!-- Routing -->
+        <div>
+            <p class="text-white font-bold text-sm mb-1">Annotation routing</p>
+            <p class="text-zinc-600 text-xs mb-4">Declare routes directly on your methods. No manual wiring.</p>
+            <div class="code-wrapper">
+                <div class="file-label">PostController.java</div>
+                <pre class="language-java"><code class="language-java">@Controller
+public class PostController extends BaseController
+{
+    @GET("/posts")
+    private Object index(PostRepository repo) {
+        return render("posts.html",
+            Map.of("posts", repo.findAll()));
+    }
+}</code></pre>
+            </div>
         </div>
-        <div class="p-4 bg-zinc-950 border border-zinc-800">
-            <div class="text-xs text-gray-600 mb-1">ORM</div>
-            <div class="text-white">ActiveJDBC</div>
+
+        <!-- Migrations -->
+        <div>
+            <p class="text-white font-bold text-sm mb-1">Fluent migrations</p>
+            <p class="text-zinc-600 text-xs mb-4">Laravel-inspired schema builder. No raw SQL.</p>
+            <div class="code-wrapper">
+                <div class="file-label">CreatePostTable.java</div>
+                <pre class="language-java"><code class="language-java">public class CreatePostTable extends Migration
+{
+    @Override
+    public void up() {
+        createTable("posts", table -> {
+            table.id();
+            table.string("title").notNull();
+            table.timestamps();
+        });
+    }
+}</code></pre>
+            </div>
         </div>
-        <div class="p-4 bg-zinc-950 border border-zinc-800">
-            <div class="text-xs text-gray-600 mb-1">Templates</div>
-            <div class="text-white">Pebble</div>
+
+        <!-- Auth -->
+        <div>
+            <p class="text-white font-bold text-sm mb-1">Authentication &amp; roles</p>
+            <p class="text-zinc-600 text-xs mb-4">Protect routes with a single annotation.</p>
+            <div class="code-wrapper">
+                <div class="file-label">AdminController.java</div>
+                <pre class="language-java"><code class="language-java">@HasRole("ADMIN")
+@GET("/admin/dashboard")
+private Object dashboard() {
+    return render("dashboard.html");
+}
+
+@CsrfProtect
+@POST("/login")
+private Object login(Request req, Response res) {
+    login(username, password, session);
+}</code></pre>
+            </div>
         </div>
-        <div class="p-4 bg-zinc-950 border border-zinc-800">
-            <div class="text-xs text-gray-600 mb-1">Build</div>
-            <div class="text-white">Maven</div>
+
+        <!-- Validation -->
+        <div>
+            <p class="text-white font-bold text-sm mb-1">Form validation</p>
+            <p class="text-zinc-600 text-xs mb-4">Simple, readable validation rules.</p>
+            <div class="code-wrapper">
+                <div class="file-label">PostController.java</div>
+                <pre class="language-java"><code class="language-java">ValidationResult result =
+    RequestValidator.validateSafe(req,
+        Map.of(
+            "title", "required|min:20",
+            "body",  "required|min:100"
+        ));
+
+if (result.fails()) {
+    return render("form.html",
+        Map.of("errors", result.getErrors()));
+}</code></pre>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- One backend, every frontend -->
+<div class=" mx-auto px-6 py-16 border-b border-zinc-900">
+    <p class="text-xs text-zinc-600 uppercase tracking-widest mb-4">One backend, every frontend</p>
+    <div class="grid md:grid-cols-2 gap-15 items-start">
+        <!-- Left: desc + tabs -->
+        <div class="pr-5">
+            <h2 class="text-2xl font-bold text-white tracking-tight mb-4">One backend.<br>Any interface_</h2>
+            <p class="text-zinc-500 text-sm leading-relaxed mb-8">
+                Obsidian doesn't force your frontend choices. Ship reactive UIs with LiveComponents, classic server-rendered pages with Pebble, or a pure JSON API consumed by any external stack.
+            </p>
+            <!-- Tab buttons -->
+            <div class="space-y-1" id="stack-tabs">
+                <button onclick="switchTab('lc')" id="tab-lc"
+                        class="tab-btn w-full text-left px-4 py-3 border-l-2 border-red-500 bg-zinc-950 transition-all">
+                    <p class="text-white text-sm font-bold">LiveComponents</p>
+                    <p class="text-zinc-500 text-xs mt-0.5">Reactive UI, zero JavaScript. Powered by SSE.</p>
+                </button>
+                <button onclick="switchTab('pebble')" id="tab-pebble"
+                        class="tab-btn w-full text-left px-4 py-3 border-l-2 border-transparent hover:border-zinc-700 hover:bg-zinc-950 transition-all">
+                    <p class="text-zinc-400 text-sm font-bold">Pebble Templates</p>
+                    <p class="text-zinc-600 text-xs mt-0.5">Full SSR with layouts, loops, and custom filters.</p>
+                </button>
+                <button onclick="switchTab('api')" id="tab-api"
+                        class="tab-btn w-full text-left px-4 py-3 border-l-2 border-transparent hover:border-zinc-700 hover:bg-zinc-950 transition-all">
+                    <p class="text-zinc-400 text-sm font-bold">REST API</p>
+                    <p class="text-zinc-600 text-xs mt-0.5">Return JSON — feed React, Vue, mobile, anything.</p>
+                </button>
+            </div>
+        </div>
+
+        <!-- Right: code panels -->
+        <div>
+            <!-- LiveComponents -->
+            <div id="panel-lc" class="tab-panel">
+                <div class="code-wrapper mb-3">
+                    <div class="file-label">Counter.java</div>
+                    <pre class="language-java"><code class="language-java">@LiveComponentImpl
+public class Counter extends LiveComponent
+{
+    @State
+    private int count = 0;
+
+    public void increment() { count++; }
+    public void decrement() { count--; }
+
+    public int getCount() { return count; }
+
+    public String template() {
+        return "components/counter.html";
+    }
+}</code></pre>
+                </div>
+                <div class="code-wrapper">
+                    <div class="file-label">counter.html</div>
+                    <pre class="language-html"><code class="language-html">&lt;div live:id="{{ _id }}"&gt;
+    &lt;h2&gt;Count: {{ count }}&lt;/h2&gt;
+    &lt;button live:click="increment"&gt;+&lt;/button&gt;
+    &lt;button live:click="decrement"&gt;-&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+                </div>
+            </div>
+
+            <!-- Pebble -->
+            <div id="panel-pebble" class="tab-panel hidden">
+                <div class="code-wrapper mb-3">
+                    <div class="file-label">PostController.java</div>
+                    <pre class="language-java"><code class="language-java">@GET("/posts")
+private Object index(PostRepository repo) {
+    return render("posts/index.html",
+        Map.of("posts", repo.findAll()));
+}</code></pre>
+                </div>
+                <div class="code-wrapper">
+                    <div class="file-label">posts/index.html</div>
+                    <pre class="language-twig"><code class="language-twig">&#123;% extends "layout.html" %&#125;
+&#123;% block content %&#125;
+    &#123;% for post in posts %&#125;
+    &lt;article&gt;
+        &lt;h2&gt;&#123;&#123; post.title &#125;&#125;&lt;/h2&gt;
+        &lt;p&gt;&#123;&#123; post.body | truncate(120) &#125;&#125;&lt;/p&gt;
+    &lt;/article&gt;
+    &#123;% endfor %&#125;
+&#123;% endblock %&#125;</code></pre>
+                </div>
+            </div>
+
+            <!-- API -->
+            <div id="panel-api" class="tab-panel hidden">
+                <div class="code-wrapper mb-3">
+                    <div class="file-label">PostController.java</div>
+                    <pre class="language-java"><code class="language-java">@Before({CorsMiddleware.class, ApiKeyMiddleware.class})
+@GET("/api/posts")
+private Object index(PostRepository repo) {
+    return json(repo.findAll());
+}</code></pre>
+                </div>
+                <div class="code-wrapper">
+                    <div class="file-label">Response</div>
+                    <pre class="language-json"><code class="language-json">[
+  {
+    "id": 1,
+    "title": "Getting started",
+    "body": "...",
+    "created_at": "2026-02-18"
+  }
+]</code></pre>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-<div class="mb-16">
-    <h2 class="text-white font-bold mb-6">What's Included</h2>
-    <div class="grid md:grid-cols-2 gap-x-8 gap-y-3">
-        <div class="flex items-start gap-3">
-            <span class="text-red-500 mt-1">✓</span>
-            <div>
-                <div class="text-white">Routing annotations (@GET, @POST, @PUT...)</div>
-                <div class="text-gray-500 text-sm">No need to declare your routes manually</div>
-            </div>
+
+<!-- Features list -->
+<div class=" mx-auto px-6 py-16 border-b border-zinc-900">
+    <p class="text-xs text-zinc-600 uppercase tracking-widest mb-8">Everything you need</p>
+    <div class="grid md:grid-cols-3 gap-px bg-zinc-900">
+        <div class="bg-black p-6">
+            <p class="text-white font-bold text-sm mb-2">LiveComponents</p>
+            <p class="text-zinc-600 text-xs leading-relaxed">Reactive server-side UI without writing a single line of JavaScript. Inspired by Laravel Livewire.</p>
         </div>
-        <div class="flex items-start gap-3">
-            <span class="text-red-500 mt-1">✓</span>
-            <div>
-                <div class="text-white">LiveComponents - Reactive UI</div>
-                <div class="text-gray-500 text-sm">Server-side components without JavaScript</div>
-            </div>
+        <div class="bg-black p-6">
+            <p class="text-white font-bold text-sm mb-2">Middleware system</p>
+            <p class="text-zinc-600 text-xs leading-relaxed"><code class="text-red-500">@Before</code> / <code class="text-red-500">@After</code> with built-in CORS, rate limiting, logging, and API key middlewares.</p>
         </div>
-        <div class="flex items-start gap-3">
-            <span class="text-red-500 mt-1">✓</span>
-            <div>
-                <div class="text-white">Laravel-style fluent migrations</div>
-                <div class="text-gray-500 text-sm">createTable, dropTable, column modifiers</div>
-            </div>
+        <div class="bg-black p-6">
+            <p class="text-white font-bold text-sm mb-2">Repository injection</p>
+            <p class="text-zinc-600 text-xs leading-relaxed">Annotate a class with <code class="text-red-500">@Repository</code> and it's automatically injected into your controller methods.</p>
         </div>
-        <div class="flex items-start gap-3">
-            <span class="text-red-500 mt-1">✓</span>
-            <div>
-                <div class="text-white">WebSockets & Server-Sent Events</div>
-                <div class="text-gray-500 text-sm">Real-time bi-directional and streaming</div>
-            </div>
+        <div class="bg-black p-6">
+            <p class="text-white font-bold text-sm mb-2">CSRF protection</p>
+            <p class="text-zinc-600 text-xs leading-relaxed">One annotation on your POST routes. Token generation and validation handled automatically.</p>
         </div>
-        <div class="flex items-start gap-3">
-            <span class="text-red-500 mt-1">✓</span>
-            <div>
-                <div class="text-white">Repository pattern with @Repository</div>
-                <div class="text-gray-500 text-sm">Built-in dependency injection</div>
-            </div>
+        <div class="bg-black p-6">
+            <p class="text-white font-bold text-sm mb-2">Flash messages</p>
+            <p class="text-zinc-600 text-xs leading-relaxed"><code class="text-red-500">redirectWithFlash()</code> for temporary success and error notifications without external dependencies.</p>
         </div>
-        <div class="flex items-start gap-3">
-            <span class="text-red-500 mt-1">✓</span>
-            <div>
-                <div class="text-white">CSRF Protection & Flash Messages</div>
-                <div class="text-gray-500 text-sm">Security and user feedback built-in</div>
-            </div>
-        </div>
-        <div class="flex items-start gap-3">
-            <span class="text-red-500 mt-1">✓</span>
-            <div>
-                <div class="text-white">ActiveRecord with getters/setters</div>
-                <div class="text-gray-500 text-sm">Manipulate your models like regular objects</div>
-            </div>
-        </div>
-        <div class="flex items-start gap-3">
-            <span class="text-red-500 mt-1">✓</span>
-            <div>
-                <div class="text-white">Middleware System (@Before, @After)</div>
-                <div class="text-gray-500 text-sm">5+ built-in middlewares ready to use</div>
-            </div>
-        </div>
-        <div class="flex items-start gap-3">
-            <span class="text-red-500 mt-1">✓</span>
-            <div>
-                <div class="text-white">BaseController with render()</div>
-                <div class="text-gray-500 text-sm">Pebble templating directly in your controllers</div>
-            </div>
-        </div>
-        <div class="flex items-start gap-3">
-            <span class="text-red-500 mt-1">✓</span>
-            <div>
-                <div class="text-white">Role-based Authentication (@HasRole)</div>
-                <div class="text-gray-500 text-sm">Flexible UserDetailsService pattern</div>
-            </div>
+        <div class="bg-black p-6">
+            <p class="text-white font-bold text-sm mb-2">Server-Sent Events</p>
+            <p class="text-zinc-600 text-xs leading-relaxed">Real-time streaming from server to client. No WebSocket complexity when you don't need it.</p>
         </div>
     </div>
 </div>
-{% include "./partials/quick-start.html" %}
+
+<!-- Examples -->
+<div class=" mx-auto px-6 py-16 border-b border-zinc-900">
+    <p class="text-xs text-zinc-600 uppercase tracking-widest mb-8">Examples</p>
+    <div class="grid md:grid-cols-3 gap-px bg-zinc-900">
+        <a href="https://github.com/obsidian-framework/blog-example" class="bg-black p-6 hover:bg-zinc-950 transition-colors block group">
+            <p class="text-white font-bold text-sm mb-2">Blog</p>
+            <p class="text-zinc-600 text-xs leading-relaxed mb-6">Auth, CRUD, validation, CSRF, flash messages. A complete real-world application.</p>
+            <span class="text-red-500 text-sm group-hover:translate-x-1 inline-block transition-transform">→</span>
+        </a>
+        <a href="https://github.com/obsidian-framework/livecomponents-examples" class="bg-black p-6 hover:bg-zinc-950 transition-colors block group">
+            <p class="text-white font-bold text-sm mb-2">LiveComponents</p>
+            <p class="text-zinc-600 text-xs leading-relaxed mb-6">Reactive counters, forms, and lists — all server-side, no JavaScript.</p>
+            <span class="text-red-500 text-sm group-hover:translate-x-1 inline-block transition-transform">→</span>
+        </a>
+        <a href="https://github.com/obsidian-framework/realtime-examples" class="bg-black p-6 hover:bg-zinc-950 transition-colors block group">
+            <p class="text-white font-bold text-sm mb-2">Realtime</p>
+            <p class="text-zinc-600 text-xs leading-relaxed mb-6">Server-Sent Events in action. Live feeds, notifications, progress bars.</p>
+            <span class="text-red-500 text-sm group-hover:translate-x-1 inline-block transition-transform">→</span>
+        </a>
+    </div>
+</div>
 {% endblock %}
