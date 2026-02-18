@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Obsidian — The web framework Java deserved</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/assets/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css">
+    <script src="/assets/js/tailwind.js"></script>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/prism-okaidia.min.css">
+    <link rel="stylesheet" href="/assets/css/prism-toolbar.min.css">
 </head>
 <body class="bg-black text-zinc-300 min-h-screen">
     <nav class="border-b border-zinc-900 bg-black/90 backdrop-blur sticky top-0 z-50">
@@ -31,15 +31,17 @@
             <a href="https://github.com/obsidian-framework/obsidian" class="hover:text-zinc-400 transition-colors">GitHub</a>
         </div>
     </footer>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
+    <script src="/assets/js/prism-core.min.js"></script>
+    <script src="/assets/js/prism-markup.min.js"></script>
+    <script src="/assets/js/prism-markup-templating.min.js"></script>
+    <script src="/assets/js/prism-clike.min.js"></script>
+    <script src="/assets/js/prism-javascript.min.js"></script>
+    <script src="/assets/js/prism-java.min.js"></script>
+    <script src="/assets/js/prism-json.min.js"></script>
+    <script src="/assets/js/prism-twig.min.js"></script>
+    <script src="/assets/js/prism-toolbar.min.js"></script>
+    <script src="/assets/js/prism-copy-to-clipboard.min.js"></script>
     <script>
-        // Point autoloader to CDN
-        Prism.plugins.autoloader.languages_path =
-            'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
-
         function switchTab(id) {
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
