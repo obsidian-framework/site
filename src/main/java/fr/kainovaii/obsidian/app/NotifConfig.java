@@ -1,13 +1,10 @@
-<section id="config">
-    <h2 class="text-3xl font-bold text-white mb-6">Configuration</h2>
-    <p class="text-gray-400 mb-6">
-        Lorem ipsum
-    </p>
+package fr.kainovaii.obsidian.app;
 
-    <div class="space-y-6">
-        <div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">@Config
+import fr.kainovaii.obsidian.config.ConfigInterface;
+import fr.kainovaii.obsidian.config.annotations.Config;
+import fr.kainovaii.obsidian.flash.FlashConfig;
+
+@Config
 public class NotifConfig implements ConfigInterface
 {
     @Override
@@ -27,9 +24,4 @@ public class NotifConfig implements ConfigInterface
         }
         """);
     }
-}</code></pre>
-            </div>
-        </div>
-    </div>
-
-</section>
+}
