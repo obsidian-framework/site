@@ -146,3 +146,23 @@ div.code-toolbar > .toolbar button:hover {
     margin-bottom: 0.5rem;
     font-family: 'JetBrains Mono', monospace;
 }
+
+.sidebar {
+    position: sticky;
+    top: 2rem;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #27272a;
+    border-radius: 2px;
+}
