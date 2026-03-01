@@ -274,7 +274,8 @@ public class DashboardController extends BaseController
 &lt;body&gt;
     {{ "{%" }} block content {{ "%}" }}{{ "{%" }} endblock {{ "%}" }}
 
-    &lt;script src="/js/obsidian-components.js"&gt;&lt;/script&gt;
+    {% verbatim %}{{ livecomponents_scripts | raw }}{% endverbatim %}
+    
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
             </div>
