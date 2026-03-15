@@ -4,14 +4,18 @@
     <p class="text-gray-400 mb-6">
         The authentication system is based on <span class="text-white">UserDetailsService</span>,
         an abstraction that lets you organize your User model however you want.
+        All auth helpers are available via the static <span class="text-white">Auth</span> class — no inheritance required.
     </p>
 
     <div class="space-y-6">
+
+        <!-- UserDetailsService -->
         <div>
             <div class="text-gray-400 text-sm mb-3">1. Create your UserDetailsService</div>
             <div class="bg-zinc-950 border border-zinc-800 p-6">
                 <pre class="line-numbers"><code class="language-java">@UserDetailsServiceImpl
 public class AppUserDetailsService implements UserDetailsService {
+
     private final UserRepository userRepository;
 
     public AppUserDetailsService(UserRepository userRepository) {
@@ -20,149 +24,294 @@ public class AppUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadByUsername(String username) {
-        return DB.withConnection(() -> {
-            if (!UserRepository.userExist(username)) return null;
-            User user = userRepository.findByUsername(username);
-            return adapt(user);
-        });
+        return userRepository.findByUsername(username);
     }
 
     @Override
     public UserDetails loadById(Object id) {
-        return DB.withConnection(() -> {
-            User user = User.findById(id);
-            return adapt(user);
-        });
-    }
-
-    private UserDetails adapt(User user) {
-        if (user == null) return null;
-
-        return new UserDetails() {
-            public Object getId() { return user.getId(); }
-            public String getUsername() { return user.getUsername(); }
-            public String getPassword() { return user.getPassword(); }
-            public String getRole() { return user.getRole(); }
-            public boolean isEnabled() { return true; }
-        };
+        return userRepository.findById(id);
     }
 }</code></pre>
             </div>
         </div>
 
+        <!-- Login / Logout -->
         <div>
-            <div class="text-gray-400 text-sm mb-3">2. Use in your controllers</div>
+            <div class="text-gray-400 text-sm mb-3">2. Login and logout</div>
             <div class="bg-zinc-950 border border-zinc-800 p-6">
                 <pre class="line-numbers"><code class="language-java">@Controller
-public class LoginController extends BaseController {
+public class AuthController extends BaseController {
 
-    @POST("/users/login")
-    private Object loginBack(Request req, Response res) {
-        String username = req.queryParams("username");
-        String password = req.queryParams("password");
-        Session session = req.session(true);
-
-        if (login(username, password, session)) {
-            res.redirect("/dashboard");
-            return true;
+    @POST("/login")
+    @CsrfProtect
+    public String login(Request req, Response res) {
+        try {
+            if (Auth.login(req.queryParams("username"), req.queryParams("password"), req)) {
+                String redirect = Auth.getRedirectAfterLogin(req, "/dashboard");
+                res.redirect(redirect);
+                halt();
+            }
+            return redirectWithFlash(req, res, "error", "Invalid credentials.", "/login");
+        } catch (LoginLockedException e) {
+            return redirectWithFlash(req, res, "error", e.getMessage(), "/login");
         }
-
-        return redirectWithFlash(req, res, "error",
-            "Incorrect login", "/users/login");
     }
 
-    @HasRole("DEFAULT")
-    @GET("/users/logout")
-    private Object logout(Request req, Response res) {
-        logout(req.session(true));
-        return redirectWithFlash(req, res, "success",
-            "Logged out", "/users/login");
+    @GET("/logout")
+    @RequireLogin
+    public String logout(Request req, Response res) {
+        Auth.logout(req.session());
+        res.redirect("/login");
+        halt();
+        return null;
     }
 }</code></pre>
             </div>
         </div>
 
+        <!-- Auth helpers -->
         <div>
-            <div class="text-gray-400 text-sm mb-3">Available methods in BaseController</div>
+            <div class="text-gray-400 text-sm mb-3">Auth utility class</div>
             <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">// Authentication
-login(username, password, session)  // Authenticate and create session
-logout(session)                     // Log out the user
+                <pre class="line-numbers"><code class="language-java">// Login — includes session fixation protection and brute force check
+Auth.login(username, password, req)
+
+// Logout
+Auth.logout(req.session())
 
 // Checks
-isLogged(req)                       // Check if logged in
-hasRole(req, "ADMIN")               // Check a role
-requireLogin(req, res)              // Force login (redirect otherwise)
+Auth.isLogged(req)              // Is the user authenticated?
+Auth.hasRole(req, "ADMIN")      // Does the user have this role?
 
-// Retrieval
-getLoggedUser(req)                  // Get the UserDetails</code></pre>
+// User retrieval — cached per request, no redundant DB calls
+Auth.user(req)                  // Get the authenticated UserDetails
+
+// Password
+Auth.hashPassword("secret")
+Auth.checkPassword("secret", hash)
+
+// Redirect after login
+Auth.getRedirectAfterLogin(req, "/dashboard")</code></pre>
+
+                <div class="bg-zinc-900 border border-zinc-700 p-4 rounded mt-4">
+                    <div class="text-gray-300 text-sm">
+                        <strong class="text-white">Note:</strong> <code class="text-red-400">BaseController</code> still exposes
+                        the same methods as delegates — existing code is not broken.
+                    </div>
+                </div>
             </div>
         </div>
 
+        <!-- @RequireLogin -->
         <div>
-            <div class="text-gray-400 text-sm mb-3">Role-based protection</div>
+            <div class="text-gray-400 text-sm mb-3">Protecting routes with @RequireLogin</div>
             <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">@HasRole("ADMIN")
-@GET("/admin/dashboard")
-private Object adminDashboard(Request req, Response res) {
-    // Accessible only to ADMIN
-    return render("admin/dashboard.html", Map.of());
-}
+                <p class="text-gray-300 mb-4">
+                    Use <code class="text-red-400">@RequireLogin</code> to protect a route or an entire controller.
+                    Unauthenticated users are redirected to <code class="text-red-400">/login</code>,
+                    and the original URL is restored after authentication.
+                </p>
+                <pre class="line-numbers"><code class="language-java">// Method level
+@GET("/dashboard")
+@RequireLogin
+public String dashboard(Request req, Response res) { ... }
 
-@HasRole("DEFAULT")
-@GET("/profile")
-private Object profile(Request req, Response res) {
-    // Accessible to all logged-in users
-    UserDetails user = getLoggedUser(req);
-    return render("profile.html", Map.of("user", user));
+// Class level — all routes in this controller are protected
+@Controller
+@RequireLogin
+public class DashboardController extends BaseController {
+
+    @GET("/dashboard")
+    public String index(Request req, Response res) { ... }
+
+    @GET("/settings")
+    public String settings(Request req, Response res) { ... }
 }</code></pre>
             </div>
         </div>
 
+        <!-- @HasRole -->
         <div>
-            <div class="text-gray-400 text-sm mb-3">Add custom fields</div>
+            <div class="text-gray-400 text-sm mb-3">Role-based protection with @HasRole</div>
             <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">// 1. Create your custom interface
+                <p class="text-gray-300 mb-4">
+                    Use <code class="text-red-400">@HasRole</code> to restrict access to a specific role.
+                    It can be applied at method level or class level. Method-level annotations take precedence.
+                </p>
+                <pre class="line-numbers"><code class="language-java">// All routes in this controller require the ADMIN role
+@Controller
+@HasRole("ADMIN")
+public class AdminController extends BaseController {
+
+    @GET("/admin")
+    public String index(Request req, Response res) { ... }
+
+    // Override class-level — requires SUPERADMIN instead
+    @GET("/admin/users")
+    @HasRole("SUPERADMIN")
+    public String users(Request req, Response res) { ... }
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- @CurrentUser -->
+        <div>
+            <div class="text-gray-400 text-sm mb-3">Injecting the current user with @CurrentUser</div>
+            <div class="bg-zinc-950 border border-zinc-800 p-6">
+                <p class="text-gray-300 mb-4">
+                    Add a parameter annotated with <code class="text-red-400">@CurrentUser</code> to receive the authenticated user
+                    directly in your controller method. The user is resolved from the per-request cache — no extra DB call.
+                </p>
+                <pre class="line-numbers"><code class="language-java">@GET("/dashboard")
+@RequireLogin
+public String dashboard(Request req, Response res, @CurrentUser User user) {
+    return render("dashboard.html", Map.of("user", user));
+}
+
+// Works with custom UserDetails implementations
+@GET("/profile")
+@RequireLogin
+public String profile(Request req, Response res, @CurrentUser AppUserDetails user) {
+    return render("profile.html", Map.of("user", user, "email", user.getEmail()));
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- Custom UserDetails -->
+        <div>
+            <div class="text-gray-400 text-sm mb-3">Custom UserDetails</div>
+            <div class="bg-zinc-950 border border-zinc-800 p-6">
+                <pre class="line-numbers"><code class="language-java">// 1. Extend the UserDetails interface
 public interface AppUserDetails extends UserDetails {
     String getEmail();
-    String getIp();
+    String getUUID();
 }
 
-// 2. Adapt to this interface
-private AppUserDetails adapt(User user) {
-    if (user == null) return null;
-    return new AppUserDetails() {
-        public Object getId() { return user.getId(); }
-        public String getUsername() { return user.getUsername(); }
-        public String getPassword() { return user.getPassword(); }
-        public String getRole() { return user.getRole(); }
-
-        // Your custom fields
-        public String getEmail() { return user.getEmail(); }
-        public String getIp() { return user.getIp(); }
-    };
+// 2. Implement it in your User model
+@Table("users")
+public class User extends Model implements AppUserDetails {
+    public Object getId()       { return getLong("id"); }
+    public String getUsername() { return getString("username"); }
+    public String getPassword() { return getString("password"); }
+    public String getRole()     { return getString("role"); }
+    public String getEmail()    { return getString("email"); }
+    public String getUUID()     { return getString("uuid"); }
 }
 
-// 3. Use in controllers
+// 3. Use directly in controllers
 @GET("/profile")
-private Object profile(Request req, Response res) {
-    AppUserDetails user = getLoggedUser(req);
-    String email = user.getEmail();  // ✅ Available!
-
+@RequireLogin
+public String profile(Request req, Response res, @CurrentUser AppUserDetails user) {
+    String email = user.getEmail();  // ✅ Available
     return render("profile.html", Map.of("user", user));
 }</code></pre>
             </div>
         </div>
 
-        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
-            <div class="text-blue-400 mb-2">💡 Tip</div>
-            <p class="text-gray-400 text-sm mb-3">
-                The <span class="text-white">@UserDetailsServiceImpl</span> annotation allows
-                the framework to automatically detect your implementation. No manual configuration needed!
-            </p>
-            <p class="text-gray-400 text-sm">
-                The <span class="text-white">"DEFAULT"</span> role means "any logged-in user".
-            </p>
+        <!-- Bearer token -->
+        <div>
+            <div class="text-gray-400 text-sm mb-3">Bearer token authentication (API)</div>
+            <div class="bg-zinc-950 border border-zinc-800 p-6">
+                <p class="text-gray-300 mb-4">
+                    For stateless API routes, use Bearer token authentication instead of sessions.
+                    Implement <code class="text-red-400">TokenResolver</code> to validate tokens and resolve users.
+                </p>
+
+                <div class="space-y-4">
+                    <div>
+                        <div class="text-white font-semibold mb-2">1. Implement TokenResolver</div>
+                        <pre class="line-numbers"><code class="language-java">@TokenResolverImpl
+public class AppTokenResolver implements TokenResolver {
+    @Override
+    public UserDetails resolve(String token) {
+        ApiToken t = ApiToken.findFirst("token = ?", token);
+        if (t == null || t.isExpired()) return null;
+        return User.findById(t.getLong("user_id"));
+    }
+}</code></pre>
+                    </div>
+
+                    <div>
+                        <div class="text-white font-semibold mb-2">2. Mark your controller as API</div>
+                        <pre class="line-numbers"><code class="language-java">@Controller
+@ApiController
+public class UserApiController extends BaseController {
+
+    @GET("/api/users")
+    @RequireLogin
+    public String index(Request req, Response res, @CurrentUser UserDetails user) {
+        return json(map("users", userRepository.findAll()));
+    }
+}</code></pre>
+                    </div>
+
+                    <div>
+                        <div class="text-white font-semibold mb-2">3. Or protect a single route with @Bearer</div>
+                        <pre class="line-numbers"><code class="language-java">@GET("/api/me")
+@Bearer
+public String me(Request req, Response res, @CurrentUser UserDetails user) {
+    return json(map("user", user));
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="bg-zinc-900 border border-zinc-700 p-4 rounded mt-4">
+                    <div class="text-gray-300 text-sm">
+                        On authentication failure, API routes return JSON instead of redirecting:
+                        <code class="text-red-400">{ "error": "Unauthorized" }</code> (401) or
+                        <code class="text-red-400">{ "error": "Forbidden" }</code> (403).
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <!-- Brute force -->
+        <div>
+            <div class="text-gray-400 text-sm mb-3">Brute force protection</div>
+            <div class="bg-zinc-950 border border-zinc-800 p-6">
+                <p class="text-gray-300 mb-4">
+                    <code class="text-red-400">Auth.login()</code> automatically enforces rate limiting per IP and per username.
+                    After <strong class="text-white">5 consecutive failed attempts</strong>, the IP and username are locked out
+                    for <strong class="text-white">15 minutes</strong>.
+                </p>
+
+                <pre class="line-numbers"><code class="language-java">try {
+    if (Auth.login(username, password, req)) {
+        res.redirect("/dashboard");
+        halt();
+    }
+    return redirectWithFlash(req, res, "error", "Invalid credentials.", "/login");
+} catch (LoginLockedException e) {
+    // e.getMessage() → "Too many failed attempts. Try again in 847 seconds."
+    return redirectWithFlash(req, res, "error", e.getMessage(), "/login");
+}</code></pre>
+
+                <div class="bg-zinc-900 border border-zinc-700 p-4 rounded mt-4">
+                    <div class="text-gray-300 text-sm">
+                        Counters reset automatically on successful login. Lockouts are tracked independently
+                        per IP and per username.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tips -->
+        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
+            <div class="text-blue-400 mb-2">💡 Tips</div>
+            <ul class="space-y-2 text-gray-400 text-sm">
+                <li>
+                    The <span class="text-white">@UserDetailsServiceImpl</span> annotation allows
+                    the framework to automatically detect your implementation — no manual configuration needed.
+                </li>
+                <li>
+                    <span class="text-white">@RequireLogin</span> replaces the old <span class="text-white">@HasRole("DEFAULT")</span> pattern.
+                </li>
+                <li>
+                    <span class="text-white">Auth.user(req)</span> is cached per request — calling it multiple times in the same
+                    request cycle does not trigger additional DB queries.
+                </li>
+            </ul>
+        </div>
+
     </div>
 </section>

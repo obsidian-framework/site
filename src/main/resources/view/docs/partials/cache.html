@@ -1,0 +1,96 @@
+<section id="cache">
+    <h2 class="text-3xl font-bold text-white mb-6">Cache</h2>
+    <p class="text-gray-400 mb-6">
+        Obsidian provides a unified cache facade backed by a swappable driver. Two drivers are available out of the box: an in-memory store for development, and Redis for production. Configuration is handled via environment variables — no code changes required to switch.
+    </p>
+
+    <div class="space-y-6">
+        <div>
+            <div class="text-gray-400 text-sm mb-3">Environment configuration</div>
+            <div class="bg-zinc-950 border border-zinc-800 p-6">
+                <pre class="line-numbers"><code class="language-bash"># Use in-memory driver (default)
+CACHE_DRIVER=memory
+
+# Use Redis driver
+CACHE_DRIVER=redis
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+REDIS_PASSWORD=secret</code></pre>
+            </div>
+        </div>
+
+        <div>
+            <div class="text-gray-400 text-sm mb-3">Store and retrieve</div>
+            <div class="bg-zinc-950 border border-zinc-800 p-6">
+                <pre class="line-numbers"><code class="language-java">// Store a value for 60 seconds
+Cache.put("user:42", user, 60);
+
+// Retrieve (cast is inferred via generics)
+User user = Cache.get("user:42");
+
+// Check existence without fetching
+if (Cache.has("user:42")) { ... }
+
+// Remove a key
+Cache.forget("user:42");</code></pre>
+            </div>
+        </div>
+
+        <div>
+            <div class="text-gray-400 text-sm mb-3">remember — cache-aside pattern</div>
+            <div class="bg-zinc-950 border border-zinc-800 p-6">
+                <pre class="line-numbers"><code class="language-java">// Returns the cached value if present.
+// Otherwise, runs the supplier, caches the result, and returns it.
+List&lt;Faction&gt; factions = Cache.remember(
+    "factions:all",
+    300,
+    () -> factionRepository.findAll()
+);</code></pre>
+            </div>
+        </div>
+
+        <div>
+            <div class="text-gray-400 text-sm mb-3">Batch operations</div>
+            <div class="bg-zinc-950 border border-zinc-800 p-6">
+                <pre class="line-numbers"><code class="language-java">// Store multiple entries with a shared TTL
+Map&lt;String, Object&gt; entries = new HashMap&lt;&gt;();
+entries.put("user:1", alice);
+entries.put("user:2", bob);
+Cache.putAll(entries, 120);
+
+// Retrieve multiple keys in order
+List&lt;String&gt; keys = List.of("user:1", "user:2");
+List&lt;User&gt; users = Cache.getAll(keys);</code></pre>
+            </div>
+        </div>
+
+        <div>
+            <div class="text-gray-400 text-sm mb-3">Custom driver</div>
+            <div class="bg-zinc-950 border border-zinc-800 p-6">
+                <pre class="line-numbers"><code class="language-java">public class MyCacheDriver implements CacheDriver
+{
+    @Override
+    public void put(String key, Object value, int ttlSeconds) { ... }
+
+    @Override
+    public Object get(String key) { ... }
+
+    // implement has(), forget(), putAll(), getAll()
+}
+
+// Register it before the server starts
+Cache.setDriver(new MyCacheDriver());</code></pre>
+            </div>
+        </div>
+
+        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
+            <div class="text-blue-400 mb-2">💡 Behaviour</div>
+            <ul class="text-gray-400 text-sm space-y-1">
+                <li>• <span class="text-white">getAll()</span> preserves key order — <span class="text-white">null</span> is returned for missing or expired entries</li>
+                <li>• Redis batch ops use Jedis pipelining — a single round-trip for any number of keys</li>
+                <li>• <span class="text-white">remember()</span> is not atomic — under concurrent load, the supplier may run more than once</li>
+                <li>• The InMemory driver evicts lazily on <span class="text-white">get()</span> — no background sweep</li>
+            </ul>
+        </div>
+    </div>
+</section>

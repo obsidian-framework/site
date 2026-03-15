@@ -1,0 +1,130 @@
+<section id="storage">
+    <h2 class="text-3xl font-bold text-white mb-6">Storage</h2>
+    <p class="text-gray-400 mb-6">
+        Obsidian provides a unified storage facade built around named disks. Each disk is an isolated backend — local filesystem, S3, or any custom implementation. The active disk is resolved at runtime from environment variables; all operations are available directly on the <span class="text-white">StorageManager</span> or on a specific disk via <span class="text-white">disk()</span>.
+    </p>
+
+    <div class="space-y-6">
+
+        <div>
+            <div class="text-gray-400 text-sm mb-3">Environment configuration</div>
+            <div class="bg-zinc-950 border border-zinc-800 p-6">
+                <pre class="line-numbers"><code class="language-bash"># Root directory on the filesystem
+STORAGE_LOCAL_ROOT=storage/app
+
+# Base URL used to generate public file URLs
+STORAGE_LOCAL_URL=https://example.com/storage
+
+# Default disk (registered disks: local, public)
+STORAGE_DISK=local</code></pre>
+            </div>
+        </div>
+
+        <div>
+            <div class="text-gray-400 text-sm mb-3">Basic operations</div>
+            <div class="bg-zinc-950 border border-zinc-800 p-6">
+                <pre class="line-numbers"><code class="language-java">@Inject
+private StorageManager storage;
+
+// Write bytes
+storage.put("reports/q3.pdf", bytes);
+
+// Write a stream
+storage.put("exports/users.csv", inputStream);
+
+// Read as bytes
+byte[] content = storage.get("reports/q3.pdf");
+
+// Open a stream
+InputStream stream = storage.stream("reports/q3.pdf");
+
+// Check existence
+if (storage.exists("reports/q3.pdf")) { ... }
+
+// Delete
+storage.delete("reports/q3.pdf");
+
+// List files in a directory
+List&lt;String&gt; files = storage.list("reports");
+
+// Public URL
+String url = storage.url("reports/q3.pdf");
+// → https://example.com/storage/reports/q3.pdf</code></pre>
+            </div>
+        </div>
+
+        <div>
+            <div class="text-gray-400 text-sm mb-3">File uploads — MultipartFile</div>
+            <div class="bg-zinc-950 border border-zinc-800 p-6">
+                <pre class="line-numbers"><code class="language-java">// Retrieve the uploaded part from the request
+Part part = request.raw().getPart("avatar");
+MultipartFile file = new MultipartFile(part);
+
+// Store with an auto-generated UUID filename
+storage.putFile("avatars", file);
+// → avatars/550e8400-e29b-41d4-a716-446655440000.png
+
+// Inspect the file before storing
+file.getOriginalName();   // "photo.png"
+file.getContentType();    // "image/png"
+file.getSize();           // 204800 (bytes)
+file.getExtension();      // "png"
+file.getInputStream();    // raw stream</code></pre>
+            </div>
+        </div>
+
+        <div>
+            <div class="text-gray-400 text-sm mb-3">Switching disks</div>
+            <div class="bg-zinc-950 border border-zinc-800 p-6">
+                <pre class="line-numbers"><code class="language-java">// Use the default disk (configured via STORAGE_DISK)
+storage.put("file.txt", bytes);
+
+// Use a specific disk explicitly
+storage.disk("public").put("images/banner.png", bytes);
+storage.disk("local").delete("tmp/import.csv");</code></pre>
+            </div>
+        </div>
+
+        <div>
+            <div class="text-gray-400 text-sm mb-3">Pre-registered disks</div>
+            <div class="bg-zinc-950 border border-zinc-800 p-6">
+                <pre class="line-numbers"><code class="language-bash">local   → STORAGE_LOCAL_ROOT              (private files)
+public  → STORAGE_LOCAL_ROOT/public       (publicly accessible files)</code></pre>
+            </div>
+        </div>
+
+        <div>
+            <div class="text-gray-400 text-sm mb-3">Custom disk</div>
+            <div class="bg-zinc-950 border border-zinc-800 p-6">
+                <pre class="line-numbers"><code class="language-java">public class S3Disk implements StorageDisk
+{
+    @Override
+    public void put(String path, byte[] content) { ... }
+
+    @Override
+    public void put(String path, InputStream stream) { ... }
+
+    @Override
+    public byte[] get(String path) { ... }
+
+    // implement stream(), delete(), exists(), list(), url()
+}
+
+// Register at boot (e.g. in a ServiceProvider or StorageLoader override)
+manager.addDisk("s3", new S3Disk(...));</code></pre>
+            </div>
+        </div>
+
+        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
+            <div class="text-blue-400 mb-2">💡 Behaviour</div>
+            <ul class="text-gray-400 text-sm space-y-1">
+                <li>• <span class="text-white">putFile()</span> always generates a UUID filename — the original name is not preserved on disk</li>
+                <li>• <span class="text-white">LocalDisk</span> creates parent directories automatically on every write</li>
+                <li>• Path traversal attempts (<span class="text-white">../</span>) throw a <span class="text-white">StorageException</span> immediately</li>
+                <li>• <span class="text-white">StorageManager</span> is registered as a singleton and is injectable via the DI container</li>
+                <li>• All failures throw the unchecked <span class="text-white">StorageException</span> — no checked IOExceptions leak out</li>
+            </ul>
+        </div>
+
+    </div>
+</section>
