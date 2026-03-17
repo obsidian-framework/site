@@ -1,25 +1,124 @@
-<section id="installation">
-    <h2 class="text-3xl font-bold text-white mb-6">Installation</h2>
+{% extends "view/layout/docs.html" %}
+{% block content %}
 
-    <div class="space-y-4 mb-6">
-        <div class="bg-zinc-950 border border-zinc-800 p-6">
-            <div class="text-gray-400 text-sm mb-3">1. Clone the repository</div>
-            <pre><code class="language-bash">git clone https://github.com/kainovaii/obsidian-skeleton.git
-cd obsidian-skeleton</code></pre>
-        </div>
+<div class="space-y-16">
 
-        <div class="bg-zinc-950 border border-zinc-800 p-6">
-            <div class="text-gray-400 text-sm mb-3">2. Run the application</div>
-            <pre><code class="language-bash">./build.bat</code></pre>
+    <section id="installation">
+        <h2 class="text-3xl font-bold text-white mb-2">Installation</h2>
+        <p class="text-gray-400 mb-8">Get your first Obsidian app running in minutes.</p>
+
+        <div class="space-y-8">
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">1. Clone the skeleton</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-bash">git clone https://github.com/obsidian-framework/skeleton my-app
+cd my-app</code></pre>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">2. Configure your database</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Create a <code class="text-red-400">.env</code> file at the project root and fill in your database credentials. See the <a href="/docs/database" class="text-red-400 hover:underline">Database</a> section for all available options.</p>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">3. Run the application</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6 space-y-6">
+                    <div>
+                        <div class="text-green-400 text-xs font-semibold uppercase tracking-widest mb-2">Development</div>
+                        <pre><code class="language-bash">mvn compile exec:java</code></pre>
+                        <p class="text-gray-500 text-xs mt-2">Compiles and starts the server in one step.</p>
+                    </div>
+                    <div class="border-t border-zinc-800 pt-6">
+                        <div class="text-blue-400 text-xs font-semibold uppercase tracking-widest mb-2">Production</div>
+                        <pre><code class="language-bash">mvn clean package
+java -jar target/app.jar</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">4. Configure exec-maven-plugin</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Make sure your <code class="text-red-400">pom.xml</code> points to your <code class="text-red-400">Main</code> class:</p>
+                    <pre><code class="language-xml">&lt;plugin&gt;
+    &lt;groupId&gt;com.obsidian.skeleton&lt;/groupId&gt;
+    &lt;artifactId&gt;exec-maven-plugin&lt;/artifactId&gt;
+    &lt;version&gt;3.1.0&lt;/version&gt;
+    &lt;configuration&gt;
+        &lt;mainClass&gt;com.yourcompany.yourapp.Main&lt;/mainClass&gt;
+    &lt;/configuration&gt;
+&lt;/plugin&gt;</code></pre>
+                    <p class="text-gray-500 text-xs mt-3">The skeleton already includes this — just update the <code class="text-red-400">mainClass</code> to match your package.</p>
+                </div>
+            </div>
+
+            <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
+                <div class="text-yellow-500 mb-3">⚠️ Prerequisites</div>
+                <ul class="text-gray-400 text-sm space-y-1">
+                    <li>• Java 17 or higher</li>
+                    <li>• Maven 3.6+</li>
+                    <li>• MySQL, PostgreSQL, or SQLite</li>
+                </ul>
+            </div>
+
         </div>
+    </section>
+
+    <section id="startup">
+        <h2 class="text-3xl font-bold text-white mb-2">Application Startup</h2>
+        <p class="text-gray-400 mb-8">Obsidian uses a convention-over-configuration approach — one line of code starts everything.</p>
+
+        <div class="space-y-8">
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Entry point</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">public class Main {
+    public static void main(String[] args) throws Exception {
+        Obsidian.run(Main.class);
+    }
+}</code></pre>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Auto-discovery</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-6">
+                        When you call <code class="text-red-400">Obsidian.run(Main.class)</code>, the framework scans the package of your <code class="text-red-400">Main</code> class and all its subpackages for annotated components. No XML, no manual registration.
+                    </p>
+                    <div class="space-y-4 text-sm">
+                        <div class="flex items-start gap-4 border-b border-zinc-800 pb-4">
+                            <span class="text-red-400 font-bold shrink-0 w-52">@Controller</span>
+                            <span class="text-gray-300">Classes with route handlers (<code class="text-red-400">@GET</code>, <code class="text-red-400">@POST</code>, etc.)</span>
+                        </div>
+                        <div class="flex items-start gap-4 border-b border-zinc-800 pb-4">
+                            <span class="text-red-400 font-bold shrink-0 w-52">@Repository</span>
+                            <span class="text-gray-300">Data access classes available for dependency injection</span>
+                        </div>
+                        <div class="flex items-start gap-4 border-b border-zinc-800 pb-4">
+                            <span class="text-red-400 font-bold shrink-0 w-52">@UserDetailsServiceImpl</span>
+                            <span class="text-gray-300">Authentication service implementation</span>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <span class="text-red-400 font-bold shrink-0 w-52">@GlobalAdvice</span>
+                            <span class="text-gray-300">Global interceptors executed before every request</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="flex items-center justify-between pt-8 border-t border-zinc-900 text-sm">
+        <span class="text-gray-600">—</span>
+        <a href="/docs/routing" class="text-gray-400 hover:text-white transition-colors">Routing →</a>
     </div>
 
-    <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
-        <div class="text-yellow-500 mb-2">⚠️ Prerequisites</div>
-        <ul class="text-gray-400 text-sm space-y-1">
-            <li>• Java 17 or higher</li>
-            <li>• Maven 3.6+</li>
-            <li>• MySQL/PostgreSQL/SQLite</li>
-        </ul>
-    </div>
-</section>
+</div>
+
+{% endblock %}

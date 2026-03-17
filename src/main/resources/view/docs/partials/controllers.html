@@ -1,0 +1,96 @@
+{% extends "view/layout/docs.html" %}
+{% block content %}
+
+<div class="space-y-16">
+
+    <section id="controllers">
+        <h2 class="text-3xl font-bold text-white mb-2">Controllers</h2>
+        <p class="text-gray-400 mb-8">All your controllers must extend <code class="text-red-400">BaseController</code> and be annotated with <code class="text-red-400">@Controller</code>.</p>
+
+        <div class="space-y-8">
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Basic controller</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">@Controller
+public class ArticleController extends BaseController {
+
+    @GET(value = "/articles", name = "articles.index")
+    private Object index(Request req, Response res) {
+        return render("articles/index.html", Map.of(
+            "title", "My articles"
+        ));
+    }
+
+    @POST(value = "/articles", name = "articles.store")
+    private Object store(Request req, Response res) {
+        String title = req.queryParams("title");
+
+        Article article = new Article();
+        article.set("title", title);
+        article.saveIt();
+
+        res.redirect("/articles");
+        return null;
+    }
+}</code></pre>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Dependency injection</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-6">Two ways to inject a <code class="text-red-400">@Repository</code> into a controller.</p>
+
+                    <div class="space-y-6">
+                        <div>
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Field injection — available across all methods</div>
+                            <pre><code class="language-java">@Controller
+public class ArticleController extends BaseController {
+
+    @Inject
+    private ArticleRepository articleRepo;
+
+    @GET(value = "/articles", name = "articles.index")
+    private Object index(Request req, Response res) {
+        List&lt;Article&gt; articles = articleRepo.findAll().stream().toList();
+        return render("articles/index.html", Map.of("articles", articles));
+    }
+
+    @DELETE(value = "/articles/:id", name = "articles.delete")
+    private Object delete(Request req, Response res) {
+        articleRepo.delete(req.params(":id"));
+        res.redirect("/articles");
+        return null;
+    }
+}</code></pre>
+                        </div>
+
+                        <div class="border-t border-zinc-800 pt-6">
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Method parameter — useful when only one route needs it</div>
+                            <pre><code class="language-java">@GET(value = "/articles", name = "articles.index")
+private Object index(Request req, Response res, ArticleRepository articleRepo) {
+    List&lt;Article&gt; articles = articleRepo.findAll().stream().toList();
+    return render("articles/index.html", Map.of("articles", articles));
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
+                <div class="text-blue-400 mb-2">💡 Tip</div>
+                <p class="text-gray-400 text-sm">Prefer <code class="text-red-400">@Inject</code> when you use the same repository in multiple methods. Use method parameters for one-off injections to keep things explicit.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <div class="flex items-center justify-between pt-8 border-t border-zinc-900 text-sm">
+        <a href="/docs/routing" class="text-gray-400 hover:text-white transition-colors">← Routing</a>
+        <a href="/docs/middleware" class="text-gray-400 hover:text-white transition-colors">Middleware →</a>
+    </div>
+
+</div>
+
+{% endblock %}

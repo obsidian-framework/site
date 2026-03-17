@@ -1,0 +1,61 @@
+{% extends "view/layout/docs.html" %}
+{% block content %}
+
+<div class="space-y-16">
+
+    <section id="seeder">
+        <h2 class="text-3xl font-bold text-white mb-2">Seeder</h2>
+        <p class="text-gray-400 mb-8">Seeders populate your database with initial or test data. Annotate your class with <code class="text-red-400">@Seeder</code> and implement <code class="text-red-400">SeederInterface</code> — the framework runs them automatically at startup. Use the <code class="text-red-400">priority</code> parameter to control execution order when multiple seeders depend on each other.</p>
+
+        <div class="space-y-8">
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Create a seeder</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">@Seeder(priority = 10)
+public class ArticleSeeder implements SeederInterface {
+
+    @Inject
+    private ArticleRepository articleRepository;
+
+    @Override
+    public void seed() {
+        if (!articleRepository.findAll().isEmpty()) {
+            return;
+        }
+
+        articleRepository.create(
+            "Getting started with Obsidian",
+            "Obsidian is a lightweight Java web framework..."
+        );
+
+        articleRepository.create(
+            "Building REST APIs",
+            "Learn how to build REST APIs with Obsidian..."
+        );
+    }
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
+                <div class="text-blue-400 mb-2">💡 Execution order</div>
+                <ul class="text-gray-400 text-sm space-y-1">
+                    <li>• Seeders run automatically at startup, before the server accepts requests</li>
+                    <li>• Lower <code class="text-red-400">priority</code> values run first — use this when seeders depend on each other</li>
+                    <li>• Always guard with an existence check to avoid duplicate data on restart</li>
+                    <li>• <code class="text-red-400">@Inject</code> works in seeders the same way as in controllers</li>
+                </ul>
+            </div>
+
+        </div>
+    </section>
+
+    <div class="flex items-center justify-between pt-8 border-t border-zinc-900 text-sm">
+        <a href="/docs/repositories" class="text-gray-400 hover:text-white transition-colors">← Repositories</a>
+        <a href="/docs/security" class="text-gray-400 hover:text-white transition-colors">Security →</a>
+    </div>
+
+</div>
+
+{% endblock %}

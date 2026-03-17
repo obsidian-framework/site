@@ -1,43 +1,171 @@
-<section id="templates">
-    <h2 class="text-3xl font-bold text-white mb-6">Pebble Templates</h2>
+{% extends "view/layout/docs.html" %}
+{% block content %}
 
-    <p class="text-gray-400 mb-6">
-        Use Pebble for your views. Simple and powerful syntax.
-    </p>
+<div class="space-y-16">
 
-    <div class="space-y-6">
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Basic template</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-twig">{# views/articles/index.html #}
-{{ "{%" }} extends "layout.html" {{ "%}" }}
+    <section id="templates">
+        <h2 class="text-3xl font-bold text-white mb-2">Templates</h2>
+        <p class="text-gray-400 mb-8">Obsidian uses <a href="https://pebbletemplates.io" target="_blank" class="text-red-400 hover:underline">Pebble</a> as its templating engine — a Java template engine inspired by Twig.</p>
 
-{{ "{%" }} block title {{ "%}" }}{{ "{{" }} title {{ "}}" }}{{ "{%" }} endblock {{ "%}" }}
+        <div class="space-y-8">
 
-{{ "{%" }} block content {{ "%}" }}
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Basic template</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-twig">&lt;!-- views/articles/index.html --&gt;
+&#123;% extends "layout.html" %&#125;
 
-    &lt;h1&gt;{{ "{{" }} title {{ "}}" }}&lt;/h1&gt;
+&#123;% block title %&#125;&#123;&#123; title &#125;&#125;&#123;% endblock %&#125;
 
-    {{ "{%" }} for article in articles {{ "%}" }}
+&#123;% block content %&#125;
+    &lt;h1&gt;&#123;&#123; title &#125;&#125;&lt;/h1&gt;
 
+    &#123;% for article in articles %&#125;
     &lt;article&gt;
-        &lt;h2&gt;{{ "{{" }} article.title {{ "}}" }}&lt;/h2&gt;
-        &lt;p&gt;{{ "{{" }} article.content {{ "}}" }}&lt;/p&gt;
+        &lt;h2&gt;&#123;&#123; article.title &#125;&#125;&lt;/h2&gt;
+        &lt;p&gt;&#123;&#123; article.content &#125;&#125;&lt;/p&gt;
     &lt;/article&gt;
-    {{ "{%" }} endfor {{ "%}" }}
-
-{{ "{%" }} endblock {{ "%}" }}</code></pre>
+    &#123;% endfor %&#125;
+&#123;% endblock %&#125;</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Render from a controller</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">return render("articles/index.html", Map.of(
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Render from a controller</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">return render("articles/index.html", Map.of(
     "title", "My articles",
     "articles", articles
 ));</code></pre>
+                </div>
             </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Layout inheritance</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Define a base layout and extend it in every view.</p>
+                    <pre><code class="language-twig">&lt;!-- views/layout.html --&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;&#123;% block title %&#125;My App&#123;% endblock %&#125;&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;nav&gt;...&lt;/nav&gt;
+
+    &#123;% block content %&#125;&#123;% endblock %&#125;
+
+    &#123;&#123; flash() | raw &#125;&#125;
+    &#123;&#123; flow_scripts | raw &#125;&#125;
+    &#123;&#123; livecomponents_scripts | raw &#125;&#125;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Obsidian helpers</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-6">These functions are available in all Pebble templates automatically — no import needed.</p>
+
+                    <div class="space-y-6">
+
+                        <div>
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">CSRF</div>
+                            <pre><code class="language-twig">&lt;form method="POST" action="/articles"&gt;
+    &#123;&#123; csrf_field() | raw &#125;&#125;
+    &lt;input type="text" name="title"&gt;
+    &lt;button type="submit"&gt;Create&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;!-- Or just the token for AJAX --&gt;
+&lt;meta name="csrf-token" content="&#123;&#123; csrf_token() &#125;&#125;"&gt;</code></pre>
+                        </div>
+
+                        <div class="border-t border-zinc-800 pt-6">
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Named routes</div>
+                            <pre><code class="language-twig">&lt;a href="&#123;&#123; route(name='articles.index') &#125;&#125;"&gt;All articles&lt;/a&gt;
+&lt;a href="&#123;&#123; route(name='articles.show', params={'id': article.id}) &#125;&#125;"&gt;View&lt;/a&gt;
+&lt;form action="&#123;&#123; route(name='articles.store') &#125;&#125;" method="post"&gt;...&lt;/form&gt;</code></pre>
+                        </div>
+
+                        <div class="border-t border-zinc-800 pt-6">
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Flash messages</div>
+                            <pre><code class="language-twig">&#123;&#123; flash() &#125;&#125;</code></pre>
+                            <p class="text-gray-500 text-xs mt-2">Renders the flash notification if one exists. Place it in your base layout. See <a href="/docs/flash-messages" class="text-red-400 hover:underline">Flash messages</a>.</p>
+                        </div>
+
+                        <div class="border-t border-zinc-800 pt-6">
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Validation errors &amp; old input</div>
+                            <pre><code class="language-twig">&lt;input
+    type="text"
+    name="username"
+    value="&#123;&#123; old('username') &#125;&#125;"
+    class="&#123;&#123; error('username') ? 'border-red-500' : '' &#125;&#125;"
+&gt;
+&#123;% if error('username') %&#125;
+    &lt;p class="text-red-400 text-sm"&gt;&#123;&#123; error('username') &#125;&#125;&lt;/p&gt;
+&#123;% endif %&#125;</code></pre>
+                        </div>
+
+                        <div class="border-t border-zinc-800 pt-6">
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">LiveComponents</div>
+                            <pre><code class="language-twig">&#123;&#123; component('Counter') | raw &#125;&#125;</code></pre>
+                            <p class="text-gray-500 text-xs mt-2">Renders a LiveComponent by class name. See <a href="/docs/live-components" class="text-red-400 hover:underline">LiveComponents</a>.</p>
+                        </div>
+
+                        <div class="border-t border-zinc-800 pt-6">
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Scripts</div>
+                            <pre><code class="language-twig">&#123;&#123; flow_scripts | raw &#125;&#125;           &lt;!-- Client-side navigation --&gt;
+&#123;&#123; livecomponents_scripts | raw &#125;&#125;  &lt;!-- LiveComponents runtime --&gt;</code></pre>
+                            <p class="text-gray-500 text-xs mt-2">Include these at the bottom of your base layout. The <code class="text-red-400">| raw</code> filter is required — without it Pebble escapes the script tags.</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Common Pebble syntax</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-twig">&lt;!-- Variables --&gt;
+&#123;&#123; variable &#125;&#125;
+&#123;&#123; object.property &#125;&#125;
+
+&lt;!-- Conditions --&gt;
+&#123;% if user != null %&#125;
+    Hello, &#123;&#123; user.username &#125;&#125;!
+&#123;% else %&#125;
+    Hello, guest!
+&#123;% endif %&#125;
+
+&lt;!-- Loops --&gt;
+&#123;% for item in items %&#125;
+    &lt;li&gt;&#123;&#123; item.name &#125;&#125;&lt;/li&gt;
+&#123;% else %&#125;
+    &lt;li&gt;No items found.&lt;/li&gt;
+&#123;% endfor %&#125;
+
+&lt;!-- Filters --&gt;
+&#123;&#123; title | upper &#125;&#125;
+&#123;&#123; content | truncate(100) &#125;&#125;
+&#123;&#123; date | date("dd/MM/yyyy") &#125;&#125;</code></pre>
+                </div>
+            </div>
+
+            <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
+                <div class="text-blue-400 mb-2">💡 Full Pebble documentation</div>
+                <p class="text-gray-400 text-sm">For the complete list of tags, filters, and functions, refer to the <a href="https://pebbletemplates.io/wiki/" target="_blank" class="text-red-400 hover:underline">official Pebble documentation →</a></p>
+            </div>
+
         </div>
+    </section>
+
+    <div class="flex items-center justify-between pt-8 border-t border-zinc-900 text-sm">
+        <a href="/docs/middleware" class="text-gray-400 hover:text-white transition-colors">← Middleware</a>
+        <a href="/docs/validation" class="text-gray-400 hover:text-white transition-colors">Validation →</a>
     </div>
-</section>
+
+</div>
+
+{% endblock %}

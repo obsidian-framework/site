@@ -10,58 +10,10 @@
     <link rel="stylesheet" href="/assets/css/prism-okaidia.min.css">
 </head>
 <body class="bg-black text-zinc-300 min-h-screen">
-    <nav class="border-b border-zinc-900 bg-black/90 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <a href="/" class="text-white font-bold text-lg">
-                <img class="w-[120px]" src="/assets/img/logo.png" alt="obsidian-logo">
-            </a>
-            <div class="flex items-center gap-8 text-xs text-zinc-500">
-                <a href="{{ route('doc.home') }}" class="hover:text-white transition-colors text-[16px]">Docs</a>
-                <a href="https://github.com/obsidian-framework" class="hover:text-white transition-colors text-[16px]">GitHub</a>
-            </div>
-        </div>
-    </nav>
+    {% include "../landing/partials/navbar.html" %}
     <div class="max-w-7xl mx-auto items-center justify-between">
         {% block content %}{% endblock %}
     </div>
-    <footer class="max-w-7xl mx-auto px-6 py-8 flex items-center justify-between text-xs text-zinc-700">
-        <span>© 2026 KainoVaii — MIT License</span>
-        <div class="flex items-center gap-6">
-            <a href="/docs" class="hover:text-zinc-400 transition-colors">Docs</a>
-            <a href="https://github.com/obsidian-framework/obsidian" class="hover:text-zinc-400 transition-colors">GitHub</a>
-        </div>
-    </footer>
-    {{ livecomponents_scripts | raw }}
-    <script src="/assets/js/prism-core.min.js"></script>
-    <script src="/assets/js/prism-markup.min.js"></script>
-    <script src="/assets/js/prism-markup-templating.min.js"></script>
-    <script src="/assets/js/prism-clike.min.js"></script>
-    <script src="/assets/js/prism-javascript.min.js"></script>
-    <script src="/assets/js/prism-java.min.js"></script>
-    <script src="/assets/js/prism-json.min.js"></script>
-    <script src="/assets/js/prism-twig.min.js"></script>
-    <script src="/assets/js/prism-toolbar.min.js"></script>
-    <script src="/assets/js/prism-copy-to-clipboard.min.js"></script>
-    <script>
-        function switchTab(id) {
-            document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('border-red-500', 'bg-zinc-950');
-                btn.classList.add('border-transparent');
-                const title = btn.querySelector('p');
-                if (title) title.classList.replace('text-white', 'text-zinc-400');
-            });
-
-            document.getElementById('panel-' + id).classList.remove('hidden');
-            const activeBtn = document.getElementById('tab-' + id);
-            activeBtn.classList.add('border-red-500', 'bg-zinc-950');
-            activeBtn.classList.remove('border-transparent');
-            const activeTitle = activeBtn.querySelector('p');
-            if (activeTitle) activeTitle.classList.replace('text-zinc-400', 'text-white');
-
-            // Re-highlight newly visible code blocks
-            Prism.highlightAll();
-        }
-    </script>
+    {% include "../landing/partials/footer.html" %}
 </body>
 </html>

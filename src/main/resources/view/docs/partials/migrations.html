@@ -1,0 +1,95 @@
+{% extends "view/layout/docs.html" %}
+{% block content %}
+
+<div class="space-y-16">
+
+    <section id="migrations">
+        <h2 class="text-3xl font-bold text-white mb-2">Migrations</h2>
+        <p class="text-gray-400 mb-8">A fluent migration system inspired by Laravel to manage your database structure.</p>
+
+        <div class="space-y-8">
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Create a table</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">public class CreateArticlesTable extends Migration {
+
+    @Override
+    public void up() {
+        createTable("articles", table -> {
+            table.id();
+            table.string("title").notNull();
+            table.text("content").notNull();
+            table.integer("status").defaultValue(1);
+            table.integer("user_id").foreignKey("users", "id");
+            table.timestamps();
+        });
+    }
+
+    @Override
+    public void down() {
+        dropTable("articles");
+    }
+}</code></pre>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Available column types</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <table class="w-full text-sm">
+                        <thead>
+                        <tr class="border-b border-zinc-800">
+                            <th class="text-left py-3 pr-6 text-white font-medium">Method</th>
+                            <th class="text-left py-3 text-white font-medium">SQL type</th>
+                        </tr>
+                        </thead>
+                        <tbody class="text-gray-400">
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">table.id()</td><td class="py-3">PRIMARY KEY AUTO_INCREMENT</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">table.string("name")</td><td class="py-3">VARCHAR(255)</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">table.string("code", 10)</td><td class="py-3">VARCHAR(10)</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">table.text("content")</td><td class="py-3">TEXT</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">table.integer("count")</td><td class="py-3">INT</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">table.bigInteger("big_count")</td><td class="py-3">BIGINT</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">table.decimal("price", 10, 2)</td><td class="py-3">DECIMAL(10,2)</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">table.boolean("active")</td><td class="py-3">BOOLEAN</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">table.date("birth_date")</td><td class="py-3">DATE</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">table.datetime("event_at")</td><td class="py-3">DATETIME</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">table.timestamp("logged_at")</td><td class="py-3">TIMESTAMP</td></tr>
+                        <tr><td class="py-3 pr-6 text-red-400 font-mono">table.timestamps()</td><td class="py-3">created_at + updated_at</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Modifiers</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <table class="w-full text-sm">
+                        <thead>
+                        <tr class="border-b border-zinc-800">
+                            <th class="text-left py-3 pr-6 text-white font-medium">Modifier</th>
+                            <th class="text-left py-3 text-white font-medium">Description</th>
+                        </tr>
+                        </thead>
+                        <tbody class="text-gray-400">
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">.notNull()</td><td class="py-3">Column cannot be null</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">.defaultValue(0)</td><td class="py-3">Sets a default value</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">.unique()</td><td class="py-3">Adds a unique constraint</td></tr>
+                        <tr><td class="py-3 pr-6 text-red-400 font-mono">.foreignKey("users", "id")</td><td class="py-3">Adds a foreign key constraint</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <div class="flex items-center justify-between pt-8 border-t border-zinc-900 text-sm">
+        <a href="/docs/models" class="text-gray-400 hover:text-white transition-colors">← Models</a>
+        <a href="/docs/repositories" class="text-gray-400 hover:text-white transition-colors">Repositories →</a>
+    </div>
+
+</div>
+
+{% endblock %}

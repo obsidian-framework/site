@@ -1,27 +1,33 @@
-<section id="live-components">
-    <h2 class="text-3xl font-bold text-white mb-6">LiveComponents</h2>
+{% extends "view/layout/docs.html" %}
+{% block content %}
 
-    <p class="text-gray-400 mb-6">
-        Build reactive, real-time interfaces without writing JavaScript. Server-side components with automatic state synchronization.
-    </p>
+<div class="space-y-16">
 
-    <div class="space-y-6">
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Creating a component</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">@LiveComponentImpl
-public class Counter extends LiveComponent
-{
+    <section id="live-components">
+        <h2 class="text-3xl font-bold text-white mb-2">LiveComponents</h2>
+        <p class="text-gray-400 mb-8">Build reactive, real-time interfaces without writing JavaScript. Server-side components with automatic state synchronization.</p>
+
+        <div class="space-y-12">
+
+            <!-- Basics -->
+            <div>
+                <h3 class="text-xl font-bold text-white mb-6 pb-3 border-b border-zinc-800">Basics</h3>
+                <div class="space-y-8">
+
+                    <div>
+                        <div class="text-gray-400 text-sm mb-3">Create a component</div>
+                        <div class="bg-zinc-950 border border-zinc-800 p-6">
+                            <pre><code class="language-java">@LiveComponentImpl
+public class Counter extends LiveComponent {
+
     @State
     private int count = 0;
 
-    public void increment() {
-        count++;
-    }
+    @Action
+    public void increment() { count++; }
 
-    public void decrement() {
-        count--;
-    }
+    @Action
+    public void decrement() { count--; }
 
     public int getCount() { return count; }
 
@@ -30,160 +36,239 @@ public class Counter extends LiveComponent
         return "components/counter.html";
     }
 }</code></pre>
-            </div>
-        </div>
+                        </div>
+                    </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Component template (counter.html)</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-html">&lt;div live:id="{{ "{{" }} _id {{ "}}" }}"&gt;
-    &lt;h2&gt;Count: {{ "{{" }} count {{ "}}" }}&lt;/h2&gt;
+                    <div>
+                        <div class="text-gray-400 text-sm mb-3">Component template</div>
+                        <div class="bg-zinc-950 border border-zinc-800 p-6">
+                            <pre><code class="language-html">&lt;div live:id="&#123;&#123; _id &#125;&#125;"&gt;
+    &lt;h2&gt;Count: &#123;&#123; count &#125;&#125;&lt;/h2&gt;
 
     &lt;button live:click="increment"&gt;+ Increment&lt;/button&gt;
     &lt;button live:click="decrement"&gt;- Decrement&lt;/button&gt;
 
     &lt;div live:loading&gt;Updating...&lt;/div&gt;
 &lt;/div&gt;</code></pre>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="text-gray-400 text-sm mb-3">Use in a template</div>
+                        <div class="bg-zinc-950 border border-zinc-800 p-6">
+                            <pre><code class="language-twig">&#123;% component 'Counter' %&#125;</code></pre>
+                            <p class="text-gray-500 text-xs mt-3">The <code class="text-red-400">&#123;% component %&#125;</code> tag replaces the old <code class="text-red-400">&#123;&#123; component('X') | raw &#125;&#125;</code> — no more forgotten <code class="text-red-400">| raw</code>.</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="text-gray-400 text-sm mb-3">Setup — include scripts in layout</div>
+                        <div class="bg-zinc-950 border border-zinc-800 p-6">
+                            <p class="text-gray-400 text-sm mb-4">Routes that use LiveComponents require <code class="text-red-400">SessionMiddleware</code> and the LiveComponents runtime script in your layout.</p>
+                            <pre><code class="language-java">@Before(SessionMiddleware.class)
+@GET("/dashboard")
+public Object dashboard(Request req, Response res) {
+    return render("dashboard.html", Map.of());
+}</code></pre>
+                            <pre class="mt-4"><code class="language-twig">&lt;body&gt;
+    &#123;% block content %&#125;&#123;% endblock %&#125;
+    &#123;&#123; livecomponents_scripts | raw &#125;&#125;
+&lt;/body&gt;</code></pre>
+                        </div>
+                    </div>
+
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Using in templates</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-twig">{{ "{%" }} extends "layout/base.html" {{ "%}" }}
+            <!-- Props & Lifecycle -->
+            <div>
+                <h3 class="text-xl font-bold text-white mb-6 pb-3 border-b border-zinc-800">Props & Lifecycle</h3>
+                <div class="space-y-8">
 
-{{ "{%" }} block content {{ "%}" }}
+                    <div>
+                        <div class="text-gray-400 text-sm mb-3">@Prop — mount-time props</div>
+                        <div class="bg-zinc-950 border border-zinc-800 p-6">
+                            <p class="text-gray-400 text-sm mb-4">Fields annotated with <code class="text-red-400">@Prop</code> are injected before <code class="text-red-400">onMount()</code> and never exposed in client state.</p>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Component</div>
+                                    <pre><code class="language-java">@LiveComponentImpl
+public class UserCard extends LiveComponent {
 
-    &lt;h1&gt;My Page&lt;/h1&gt;
-    {{ "{{" }} component('Counter') | raw {{ "}}" }}
+    @Prop
+    private int userId;
 
-{{ "{%" }} endblock {{ "%}" }}</code></pre>
-            </div>
-        </div>
-
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Actions with parameters</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">@LiveComponentImpl
-public class TodoList extends LiveComponent
-{
     @State
-    private List&lt;Todo&gt; todos = new ArrayList&lt;&gt;();
+    private User user;
 
-    public void toggleTodo(int id) {
-        todos.stream()
-            .filter(t -&gt; t.id == id)
-            .findFirst()
-            .ifPresent(t -&gt; t.completed = !t.completed);
+    @Override
+    public void onMount() {
+        user = User.findById(userId);
     }
-
-    public void deleteTodo(int id) {
-        todos.removeIf(t -&gt; t.id == id);
-    }
-
-    public List&lt;Todo&gt; getTodos() { return todos; }
 
     @Override
     public String template() {
-        return "components/todo-list.html";
+        return "components/user-card.html";
     }
 }</code></pre>
+                                </div>
+                                <div class="border-t border-zinc-800 pt-4">
+                                    <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Template</div>
+                                    <pre><code class="language-twig">&#123;% component 'UserCard' with { userId: user.id } %&#125;</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="text-gray-400 text-sm mb-3">Lifecycle hooks</div>
+                        <div class="bg-zinc-950 border border-zinc-800 p-6">
+                            <pre><code class="language-java">@Override
+public void onMount() {
+    // Called once after props injection, before first render
+    // Use to load initial data
+}
+
+@Override
+public void onUpdate() {
+    // Called after every action execution, before re-render
+    // Use to recompute derived state
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="text-gray-400 text-sm mb-3">Request helpers</div>
+                        <div class="bg-zinc-950 border border-zinc-800 p-6">
+                            <pre><code class="language-java">session("key")              // Read from session
+session("key", value)       // Write to session
+param("name")               // Query/form parameter
+param("name", "default")    // With fallback
+routeParam("id")            // Route parameter (:id)</code></pre>
+                        </div>
+                    </div>
+
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Template with parameters</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-html">&lt;div live:id="{{ "{{" }} _id {{ "}}" }}"&gt;
-    {{ "{%" }} for todo in todos {{ "%}" }}
-        &lt;div&gt;
-            &lt;span&gt;{{ "{{" }} todo.text {{ "}}" }}&lt;/span&gt;
-            &lt;button live:click="toggleTodo({{ "{{" }} todo.id {{ "}}" }})"&gt;
-                Toggle
-            &lt;/button&gt;
-            &lt;button live:click="deleteTodo({{ "{{" }} todo.id {{ "}}" }})"&gt;
-                Delete
-            &lt;/button&gt;
-        &lt;/div&gt;
-    {{ "{%" }} endfor {{ "%}" }}
+            <!-- Actions -->
+            <div>
+                <h3 class="text-xl font-bold text-white mb-6 pb-3 border-b border-zinc-800">Actions</h3>
+                <div class="space-y-8">
 
-&lt;/div&gt;</code></pre>
+                    <div>
+                        <div class="text-gray-400 text-sm mb-3">@Action — explicit action contract</div>
+                        <div class="bg-zinc-950 border border-zinc-800 p-6">
+                            <p class="text-gray-400 text-sm mb-4">Only methods annotated with <code class="text-red-400">@Action</code> can be invoked from the client. Any unlisted method throws a <code class="text-red-400">ComponentException</code> immediately.</p>
+                            <pre><code class="language-java">@Action
+public void save() {
+    // Called via live:click="save"
+}
+
+@Action
+public void delete(int id) {
+    // Called via live:click="delete({{ id }})"
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="text-gray-400 text-sm mb-3">ComponentResponse — redirect & events</div>
+                        <div class="bg-zinc-950 border border-zinc-800 p-6">
+                            <p class="text-gray-400 text-sm mb-4">Actions can return a <code class="text-red-400">ComponentResponse</code> to trigger a client-side navigation or dispatch a custom event after re-render.</p>
+                            <pre><code class="language-java">@Action
+public ComponentResponse save() {
+    // Persist data...
+    return redirect("/dashboard");
+}
+
+@Action
+public ComponentResponse delete() {
+    return emit("toast:show", Map.of("message", "Deleted!"));
+}
+
+// Listen to the event on the client
+window.addEventListener("toast:show", (e) => {
+    console.log(e.detail.message); // "Deleted!"
+});</code></pre>
+                        </div>
+                    </div>
+
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Real-time search with live:model</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-        <pre class="line-numbers"><code class="language-java">@LiveComponentImpl
-public class SearchFilter extends LiveComponent
-{
+            <!-- Examples -->
+            <div>
+                <h3 class="text-xl font-bold text-white mb-6 pb-3 border-b border-zinc-800">Examples</h3>
+                <div class="space-y-8">
+
+                    <div>
+                        <div class="text-gray-400 text-sm mb-3">Real-time search with live:model</div>
+                        <div class="bg-zinc-950 border border-zinc-800 p-6">
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Component</div>
+                                    <pre><code class="language-java">@LiveComponentImpl
+public class SearchFilter extends LiveComponent {
+
     @State
     private String search = "";
 
-    // Private data (not exposed to template)
     private final List&lt;String&gt; items = List.of(
-        "React", "Vue", "Angular", "Svelte",
-        "Node.js", "Django", "Spring Boot"
+        "React", "Vue", "Angular", "Svelte", "Spring Boot"
     );
 
-    // Computed property - accessible in template
     public List&lt;String&gt; getFilteredItems() {
-        if (search == null || search.isEmpty()) {
-            return items;
-        }
+        if (search == null || search.isEmpty()) return items;
         return items.stream()
-            .filter(item -&gt; item.toLowerCase()
-                .contains(search.toLowerCase()))
+            .filter(i -&gt; i.toLowerCase().contains(search.toLowerCase()))
             .collect(Collectors.toList());
     }
 
     public String getSearch() { return search; }
 
     @Override
-    public String template() {
-        return "components/search.html";
-    }
+    public String template() { return "components/search.html"; }
 }</code></pre>
-            </div>
-        </div>
-
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Search template with auto-update</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-html">&lt;div live:id="{{ "{{" }} _id {{ "}}" }}"&gt;
-    &lt;!-- Updates server state as you type --&gt;
+                                </div>
+                                <div class="border-t border-zinc-800 pt-4">
+                                    <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Template</div>
+                                    <pre><code class="language-html">&lt;div live:id="&#123;&#123; _id &#125;&#125;"&gt;
     &lt;input
         live:model="search"
         live:debounce="300"
         type="text"
         placeholder="Search..."
-        value="{{ "{{" }} search {{ "}}" }}"
+        value="&#123;&#123; search &#125;&#125;"
     &gt;
-
-    &lt;div&gt;{{ "{{" }} filteredItems.size() {{ "}}" }} results&lt;/div&gt;
-
-    {{ "{%" }} for item in filteredItems {{ "%}" }}
-
-        &lt;div&gt;{{ "{{" }} item {{ "}}" }}&lt;/div&gt;
-    {{ "{%" }} endfor {{ "%}" }}
-
+    &lt;div&gt;&#123;&#123; filteredItems.size() &#125;&#125; results&lt;/div&gt;
+    &#123;% for item in filteredItems %&#125;
+        &lt;div&gt;&#123;&#123; item &#125;&#125;&lt;/div&gt;
+    &#123;% endfor %&#125;
 &lt;/div&gt;</code></pre>
-            </div>
-        </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Auto-refresh with live:poll</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">@LiveComponentImpl
-public class Dashboard extends LiveComponent
-{
+                    <div>
+                        <div class="text-gray-400 text-sm mb-3">Auto-refresh with live:poll</div>
+                        <div class="bg-zinc-950 border border-zinc-800 p-6">
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Component</div>
+                                    <pre><code class="language-java">@LiveComponentImpl
+public class Dashboard extends LiveComponent {
+
     @State
     private int activeUsers = 0;
 
-    public void loadInitialData() {
+    @Override
+    public void onMount() {
         activeUsers = userService.getActiveCount();
     }
 
+    @Action
     public void refreshStats() {
         activeUsers = userService.getActiveCount();
     }
@@ -191,94 +276,97 @@ public class Dashboard extends LiveComponent
     public int getActiveUsers() { return activeUsers; }
 
     @Override
-    public String template() {
-        return "components/dashboard.html";
-    }
+    public String template() { return "components/dashboard.html"; }
 }</code></pre>
-            </div>
-        </div>
-
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Dashboard template with polling</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-html">&lt;div
-    live:id="{{ "{{" }} _id {{ "}}" }}"
-    live:init="loadInitialData"
+                                </div>
+                                <div class="border-t border-zinc-800 pt-4">
+                                    <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Template</div>
+                                    <pre><code class="language-html">&lt;div
+    live:id="&#123;&#123; _id &#125;&#125;"
     live:poll.5s="refreshStats"
 &gt;
-    &lt;h2&gt;Active Users: {{ "{{" }} activeUsers {{ "}}" }}&lt;/h2&gt;
-    &lt;p&gt;Auto-updates every 5 seconds&lt;/p&gt;
-
-    &lt;div live:loading.class="opacity-100" class="opacity-0"&gt;
-        Updating...
-    &lt;/div&gt;
+    &lt;h2&gt;Active Users: &#123;&#123; activeUsers &#125;&#125;&lt;/h2&gt;
+    &lt;div live:loading.class="opacity-100" class="opacity-0"&gt;Updating...&lt;/div&gt;
 &lt;/div&gt;</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="text-gray-400 text-sm mb-3">Lazy mount</div>
+                        <div class="bg-zinc-950 border border-zinc-800 p-6">
+                            <p class="text-gray-400 text-sm mb-4">Mount a component after first paint to avoid blocking page render. The <code class="text-red-400">innerHTML</code> is shown as a skeleton during fetch.</p>
+                            <pre><code class="language-html">&lt;!-- Plain --&gt;
+&lt;div live:lazy="PlayerSearch"&gt;&lt;/div&gt;
+
+&lt;!-- With props --&gt;
+&lt;div live:lazy="UserCard" live:props='{"userId": 42}'&gt;&lt;/div&gt;
+
+&lt;!-- With skeleton --&gt;
+&lt;div live:lazy="PlayerSearch"&gt;
+    &lt;div class="animate-pulse h-8 bg-zinc-800 rounded"&gt;&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                        </div>
+                    </div>
+
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Available directives</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-html">&lt;!-- Click actions --&gt;
-&lt;button live:click="save"&gt;Save&lt;/button&gt;
-&lt;button live:click="delete({{ "{{" }} id {{ "}}" }})"&gt;Delete&lt;/button&gt;
-
-&lt;!-- Two-way binding --&gt;
-&lt;input live:model="search" type="text"&gt;
-&lt;input live:model="email" live:blur type="email"&gt;
-&lt;input live:model="username" live:lazy type="text"&gt;
-&lt;input live:model="query" live:debounce="500" type="text"&gt;
-
-&lt;!-- Auto-refresh --&gt;
-&lt;div live:poll="5s"&gt;...&lt;/div&gt;
-&lt;div live:poll.10s="refreshData"&gt;...&lt;/div&gt;
-
-&lt;!-- Lifecycle --&gt;
-&lt;div live:init="loadData"&gt;...&lt;/div&gt;
-
-&lt;!-- Confirmation --&gt;
-&lt;button live:confirm="Are you sure?"&gt;Delete&lt;/button&gt;
-
-&lt;!-- Loading states --&gt;
-&lt;div live:loading&gt;Loading...&lt;/div&gt;
-&lt;div live:loading.class="opacity-100"&gt;...&lt;/div&gt;
-&lt;button live:loading.add="opacity-50"&gt;Save&lt;/button&gt;</code></pre>
+            <!-- Directives reference -->
+            <div>
+                <h3 class="text-xl font-bold text-white mb-6 pb-3 border-b border-zinc-800">Directives reference</h3>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <table class="w-full text-sm">
+                        <thead>
+                        <tr class="border-b border-zinc-800">
+                            <th class="text-left py-3 pr-6 text-white font-medium">Directive</th>
+                            <th class="text-left py-3 text-white font-medium">Description</th>
+                        </tr>
+                        </thead>
+                        <tbody class="text-gray-400">
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">live:click="action"</td><td class="py-3">Calls an <code>@Action</code> on click</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">live:click="action(&#123;&#123; id &#125;&#125;)"</td><td class="py-3">Calls an action with a parameter</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">live:model="field"</td><td class="py-3">Two-way binding — syncs input value to state on input</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">live:debounce="300"</td><td class="py-3">Debounces <code>live:model</code> updates (ms)</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">live:blur</td><td class="py-3">Update model on blur instead of input</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">live:enter</td><td class="py-3">Update model on Enter key</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">live:submit="action"</td><td class="py-3">Intercepts form submission and calls action</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">live:poll="5s"</td><td class="py-3">Auto-refresh every N seconds/minutes</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">live:poll.5s="action"</td><td class="py-3">Auto-refresh and call a specific action</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">live:init="action"</td><td class="py-3">Calls action on component mount</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">live:confirm="message"</td><td class="py-3">Shows a confirmation dialog before calling action</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">live:loading</td><td class="py-3">Shows element while action is in progress</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">live:loading.class="cls"</td><td class="py-3">Adds class during loading</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">live:loading.add="cls"</td><td class="py-3">Adds class during loading, removes after</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">live:lazy="Component"</td><td class="py-3">Lazy mounts a component after first paint</td></tr>
+                        <tr><td class="py-3 pr-6 text-red-400 font-mono">live:props='{"key": val}'</td><td class="py-3">Props passed to a lazy-mounted component</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Setup (required)</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-        <pre class="line-numbers"><code class="language-java">// In your controller
-@Controller
-public class DashboardController extends BaseController
-{
-    @Before(SessionMiddleware.class)
-    @GET("/dashboard")
-    public Object dashboard(Request req, Response res)
-    {
-        return render("dashboard.html", Map.of());
-    }
-}</code></pre>
+            <!-- Breaking changes -->
+            <div class="flex items-start gap-3 bg-yellow-900/20 border border-yellow-700 p-6 rounded">
+                <div class="text-yellow-400 text-xl shrink-0">⚠</div>
+                <div>
+                    <div class="text-yellow-300 font-semibold mb-3">Breaking changes in v1.5.0</div>
+                    <ul class="text-yellow-200 text-sm space-y-2">
+                        <li>• <code class="text-yellow-300">@Action</code> is now <strong>required</strong> on all client-callable methods — add it to <code class="text-yellow-300">prev()</code>, <code class="text-yellow-300">next()</code>, and any action method or they will throw <code class="text-yellow-300">ComponentException</code> at runtime</li>
+                        <li>• <code class="text-yellow-300">live:lazy</code> on inputs (update on Enter key) has been renamed to <code class="text-yellow-300">live:enter</code></li>
+                        <li>• <code class="text-yellow-300">&#123;&#123; component('X') | raw &#125;&#125;</code> still works but is deprecated — migrate to <code class="text-yellow-300">&#123;% component 'X' %&#125;</code></li>
+                    </ul>
+                </div>
             </div>
+
         </div>
+    </section>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Include JavaScript in layout</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-&lt;head&gt;
-    &lt;title&gt;My App&lt;/title&gt;
-&lt;/head&gt;
-&lt;body&gt;
-    {{ "{%" }} block content {{ "%}" }}{{ "{%" }} endblock {{ "%}" }}
-
-    {% verbatim %}{{ livecomponents_scripts | raw }}{% endverbatim %}
-
-&lt;/body&gt;
-&lt;/html&gt;</code></pre>
-            </div>
-        </div>
+    <div class="flex items-center justify-between pt-8 border-t border-zinc-900 text-sm">
+        <a href="/docs/sse" class="text-gray-400 hover:text-white transition-colors">← Server-Sent Events</a>
+        <a href="/docs/flow" class="text-gray-400 hover:text-white transition-colors">Flow →</a>
     </div>
-</section>
+
+</div>
+
+{% endblock %}

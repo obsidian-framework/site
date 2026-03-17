@@ -1,0 +1,137 @@
+{% extends "view/layout/docs.html" %}
+{% block content %}
+
+<div class="space-y-16">
+
+    <section id="middleware">
+        <h2 class="text-3xl font-bold text-white mb-2">Middleware</h2>
+        <p class="text-gray-400 mb-8">Intercept requests before and after controller execution with simple annotations.</p>
+
+        <div class="space-y-8">
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Basic usage</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">@Before(LoggingMiddleware.class)
+@GET(value = "/dashboard", name = "dashboard")
+private Object dashboard(Request req, Response res) {
+    return render("dashboard.html", Map.of());
+}</code></pre>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Chain multiple middlewares</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">@Before({CorsMiddleware.class, ApiKeyMiddleware.class, RateLimitMiddleware.class})
+@GET(value = "/api/data", name = "api.data")
+private Object data(Request req, Response res) {
+    // 1. CORS headers added
+    // 2. API key validated  (401 otherwise)
+    // 3. Rate limit checked (429 otherwise)
+    // 4. Controller executed
+    return "{ \"data\": [] }";
+}</code></pre>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Before and After</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">@Before(TimingMiddleware.class)
+@After(TimingMiddleware.class)
+@GET(value = "/profile", name = "profile")
+private Object profile(Request req, Response res) {
+    return render("profile.html", Map.of());
+}</code></pre>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Built-in middlewares</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <table class="w-full text-sm">
+                        <thead>
+                        <tr class="border-b border-zinc-800">
+                            <th class="text-left py-3 pr-6 text-white font-medium">Middleware</th>
+                            <th class="text-left py-3 pr-6 text-white font-medium">Description</th>
+                            <th class="text-left py-3 text-white font-medium">Headers</th>
+                        </tr>
+                        </thead>
+                        <tbody class="text-gray-400">
+                        <tr class="border-b border-zinc-800">
+                            <td class="py-4 pr-6 text-red-400 font-medium align-top">LoggingMiddleware</td>
+                            <td class="py-4 pr-6 align-top">Logs each request with IP and User-Agent.<br><span class="text-gray-600 text-xs">Debugging, monitoring, audit trail</span></td>
+                            <td class="py-4 text-gray-600 align-top text-xs">—</td>
+                        </tr>
+                        <tr class="border-b border-zinc-800">
+                            <td class="py-4 pr-6 text-red-400 font-medium align-top">CorsMiddleware</td>
+                            <td class="py-4 pr-6 align-top">Adds CORS headers to allow cross-origin requests.<br><span class="text-gray-600 text-xs">Public APIs, separate frontends, mobile apps</span></td>
+                            <td class="py-4 text-gray-600 align-top text-xs">Access-Control-Allow-Origin: *<br>Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS<br>Access-Control-Allow-Headers: Content-Type, Authorization, X-CSRF-TOKEN</td>
+                        </tr>
+                        <tr class="border-b border-zinc-800">
+                            <td class="py-4 pr-6 text-red-400 font-medium align-top">RateLimitMiddleware</td>
+                            <td class="py-4 pr-6 align-top">Limits to 100 requests/minute per IP. Returns 429 if exceeded.<br><span class="text-gray-600 text-xs">Anti-spam, anti-DDoS, public endpoints</span></td>
+                            <td class="py-4 text-gray-600 align-top text-xs">X-RateLimit-Limit: 100<br>X-RateLimit-Remaining: 87</td>
+                        </tr>
+                        <tr class="border-b border-zinc-800">
+                            <td class="py-4 pr-6 text-red-400 font-medium align-top">TimingMiddleware</td>
+                            <td class="py-4 pr-6 align-top">Measures execution time.<br><span class="text-gray-600 text-xs">Performance optimization, detecting slow routes</span></td>
+                            <td class="py-4 text-gray-600 align-top text-xs">X-Response-Time: 42ms</td>
+                        </tr>
+                        <tr>
+                            <td class="py-4 pr-6 text-red-400 font-medium align-top">ApiKeyMiddleware</td>
+                            <td class="py-4 pr-6 align-top">Verifies the X-API-Key header. Returns 401 if invalid.<br><span class="text-gray-600 text-xs">Securing APIs, simple authentication</span></td>
+                            <td class="py-4 text-gray-600 align-top text-xs">—</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Create a custom middleware</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">public class MaintenanceMiddleware implements Middleware {
+
+    @Override
+    public void handle(Request req, Response res) throws Exception {
+        boolean isMaintenance = System.getenv("MAINTENANCE_MODE") != null;
+
+        if (isMaintenance && !req.pathInfo().equals("/maintenance")) {
+            res.redirect("/maintenance");
+            throw new Exception("Maintenance mode");
+        }
+    }
+}
+
+@Before(MaintenanceMiddleware.class)
+@GET("/dashboard")
+private Object dashboard(Request req, Response res) {
+    return render("dashboard.html", Map.of());
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
+                <div class="text-blue-400 mb-2">💡 Execution order</div>
+                <ul class="text-gray-400 text-sm space-y-1">
+                    <li>• <code class="text-red-400">@Before</code> middlewares execute in array order</li>
+                    <li>• Controller executes next</li>
+                    <li>• <code class="text-red-400">@After</code> middlewares execute after the controller</li>
+                    <li>• If a middleware throws an exception, execution stops immediately</li>
+                    <li>• Middlewares are instantiated once (singleton)</li>
+                </ul>
+            </div>
+
+        </div>
+    </section>
+
+    <div class="flex items-center justify-between pt-8 border-t border-zinc-900 text-sm">
+        <a href="/docs/controllers" class="text-gray-400 hover:text-white transition-colors">← Controllers</a>
+        <a href="/docs/templates" class="text-gray-400 hover:text-white transition-colors">Templates →</a>
+    </div>
+
+</div>
+
+{% endblock %}

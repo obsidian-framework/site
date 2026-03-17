@@ -1,16 +1,20 @@
-<section id="cli">
-    <h2 class="text-3xl font-bold text-white mb-6">CLI</h2>
-    <p class="text-gray-400 mb-6">
-        Obsidian includes a built-in CLI to run custom commands from the terminal. Any class annotated with <span class="text-white">@Command</span> and implementing <span class="text-white">Runnable</span> is automatically discovered at startup — no registration needed.
-    </p>
+{% extends "view/layout/docs.html" %}
+{% block content %}
 
-    <div class="space-y-6">
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Create a command</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">@Command(name = "greet", description = "Greet a user", aliases = {"g"})
-public class GreetCommand implements Runnable
-{
+<div class="space-y-16">
+
+    <section id="cli">
+        <h2 class="text-3xl font-bold text-white mb-2">CLI</h2>
+        <p class="text-gray-400 mb-8">Obsidian includes a built-in CLI to run custom commands from the terminal. Any class annotated with <code class="text-red-400">@Command</code> and implementing <code class="text-red-400">Runnable</code> is automatically discovered at startup — no registration needed.</p>
+
+        <div class="space-y-8">
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Create a command</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">@Command(name = "greet", description = "Greet a user", aliases = {"g"})
+public class GreetCommand implements Runnable {
+
     @Param(index = 0, name = "name", description = "Name to greet")
     private String name;
 
@@ -18,46 +22,35 @@ public class GreetCommand implements Runnable
     private boolean upper;
 
     @Override
-    public void run()
-    {
+    public void run() {
         String message = "Hello, " + name + "!";
         Printer.ok(upper ? message.toUpperCase() : message);
     }
 }</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Run from the terminal</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-bash"># Run a command
-obsidian greet Alice
-
-# With an option
-obsidian greet Alice --upper
-
-# List all available commands
-obsidian --help
-
-# Help for a specific command
-obsidian greet --help
-
-# Framework version
-obsidian --version</code></pre>
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Run from the terminal</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-bash">obsidian greet Alice           # Run a command
+obsidian greet Alice --upper   # With an option
+obsidian --help                # List all commands
+obsidian greet --help          # Help for a specific command
+obsidian --version             # Framework version</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Arguments and options</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">@Command(name = "migrate", description = "Run database migrations")
-public class MigrateCommand implements Runnable
-{
-    // Positional argument — required by default
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Arguments and options</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">@Command(name = "migrate", description = "Run database migrations")
+public class MigrateCommand implements Runnable {
+
     @Param(index = 0, name = "target", description = "Target migration", required = false)
     private String target;
 
-    // Variadic — captures all remaining positional args
+    // Captures all remaining positional args
     @Param(index = 1, name = "files", description = "Migration files", variadic = true)
     private String[] files;
 
@@ -74,17 +67,15 @@ public class MigrateCommand implements Runnable
     private String db;
 
     @Override
-    public void run() {
-        // ...
-    }
+    public void run() { ... }
 }</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Printer — styled output</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">Printer.ok("Migration completed");       // green  [OK]
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Printer — styled output</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">Printer.ok("Migration completed");       // green  [OK]
 Printer.error("Connection failed");      // red    [ERROR]
 Printer.warning("Deprecated usage");     // yellow [WARNING]
 Printer.info("Starting server...");      // blue   [INFO]
@@ -92,64 +83,71 @@ Printer.note("Config file loaded");      // cyan   [NOTE]
 Printer.caution("This will drop data");  // red    [CAUTION]
 Printer.print("Plain text output");
 Printer.print();                         // blank line</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Interactive prompts</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">// Free text input with optional default
-String name = CliComponents.Prompt.text("What is your name?", "Guest");
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Interactive prompts</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">String name = CliComponents.Prompt.text("What is your name?", "Guest");
 
-// Yes/no confirmation
 boolean confirmed = CliComponents.Prompt.confirm("Are you sure?", false);
 
-// Single-choice selection
 String env = CliComponents.Prompt.select(
     "Select environment",
     "development", "staging", "production"
 );</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Progress bar and spinner</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">// Progress bar
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Progress bar and spinner</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">// Progress bar
 CliComponents.ProgressBar bar = new CliComponents.ProgressBar(100, "Importing");
-for (int i = 0; i <= 100; i++) {
+for (int i = 0; i &lt;= 100; i++) {
     bar.update(i);
     Thread.sleep(20);
 }
 bar.finish();
 
-// Spinner (runs on a background thread)
+// Spinner
 CliComponents.Spinner spinner = new CliComponents.Spinner("Connecting to database...");
 spinner.start();
 // ... do work ...
 spinner.stop("Connected!");</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Table output</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">new CliComponents.Table("ID", "Name", "Status")
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Table output</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">new CliComponents.Table("ID", "Name", "Status")
     .addRow("1", "Alice", "active")
     .addRow("2", "Bob",   "inactive")
     .addRow("3", "Carol", "active")
     .print();</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
-            <div class="text-blue-400 mb-2">💡 Behavior</div>
-            <ul class="text-gray-400 text-sm space-y-1">
-                <li>• If no args are passed, the server starts normally — CLI doesn't interfere</li>
-                <li>• If the first arg matches a command name or alias, the command runs and the process exits</li>
-                <li>• ANSI colors are automatically disabled when no terminal is detected</li>
-                <li>• Use <span class="text-white">aliases</span> in <span class="text-white">@Command</span> to provide shorthand names</li>
-            </ul>
+            <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
+                <div class="text-blue-400 mb-2">💡 Behavior</div>
+                <ul class="text-gray-400 text-sm space-y-1">
+                    <li>• If no args are passed, the server starts normally — CLI doesn't interfere</li>
+                    <li>• If the first arg matches a command name or alias, the command runs and the process exits</li>
+                    <li>• ANSI colors are automatically disabled when no terminal is detected</li>
+                    <li>• Use <code class="text-red-400">aliases</code> in <code class="text-red-400">@Command</code> to provide shorthand names</li>
+                </ul>
+            </div>
+
         </div>
+    </section>
+
+    <div class="flex items-center justify-between pt-8 border-t border-zinc-900 text-sm">
+        <a href="/docs/flow" class="text-gray-400 hover:text-white transition-colors">← Flow</a>
+        <a href="/docs/config" class="text-gray-400 hover:text-white transition-colors">Config →</a>
     </div>
-</section>
+
+</div>
+
+{% endblock %}

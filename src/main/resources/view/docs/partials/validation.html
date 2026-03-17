@@ -1,14 +1,18 @@
-<section id="validation">
-    <h2 class="text-3xl font-bold text-white mb-6">Validation</h2>
-    <p class="text-gray-400 mb-6">
-        Validate incoming request data with a fluent, Laravel-style syntax. Rules are defined as pipe-separated strings and errors are automatically collected per field.
-    </p>
+{% extends "view/layout/docs.html" %}
+{% block content %}
 
-    <div class="space-y-6">
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Basic usage in a controller</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">@POST(value = "/register", name = "register.store")
+<div class="space-y-16">
+
+    <section id="validation">
+        <h2 class="text-3xl font-bold text-white mb-2">Validation</h2>
+        <p class="text-gray-400 mb-8">Validate incoming request data with a fluent, Laravel-style syntax. Rules are defined as pipe-separated strings and errors are automatically collected per field.</p>
+
+        <div class="space-y-8">
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Basic usage</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">@POST(value = "/register", name = "register.store")
 private Object store(Request req, Response res) {
     Map&lt;String, Object&gt; data = RequestValidator.validate(req, Map.of(
         "username", "required|min:3|max:20|alphanumeric",
@@ -19,16 +23,14 @@ private Object store(Request req, Response res) {
     // data contains only validated fields
     return render("dashboard.html", Map.of());
 }</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Safe validation (without exception)</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <p class="text-gray-400 mb-4">
-                    Use <span class="text-white">validateSafe()</span> when you want to handle errors manually instead of catching an exception.
-                </p>
-                <pre class="line-numbers"><code class="language-java">@POST(value = "/register", name = "register.store")
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Safe validation — handle errors manually</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Use <code class="text-red-400">validateSafe()</code> to get a <code class="text-red-400">ValidationResult</code> instead of catching an exception.</p>
+                    <pre><code class="language-java">@POST(value = "/register", name = "register.store")
 private Object store(Request req, Response res) {
     ValidationResult result = RequestValidator.validateSafe(req, Map.of(
         "username", "required|min:3|max:20",
@@ -39,75 +41,81 @@ private Object store(Request req, Response res) {
     if (result.fails()) {
         return render("register.html", Map.of(
             "errors", result.getErrors(),
-            "old", req.queryMap().toMap()
+            "old",    req.queryMap().toMap()
         ));
     }
 
     Map&lt;String, Object&gt; data = result.getData();
     // ...
 }</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Available rules</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">"required"              // Field must not be null or empty
-"email"                 // Must be a valid email address
-"min:8"                 // Minimum 8 characters
-"max:255"               // Maximum 255 characters
-"between:3,20"          // Length or value between 3 and 20
-"numeric"               // Must be a number
-"integer"               // Must be an integer
-"alpha"                 // Letters only
-"alphanumeric"          // Letters and numbers only
-"url"                   // Must be a valid URL
-"confirmed"             // Must match field_confirmation
-"unique:users,email"    // Must not exist in table/column
-"in:admin,editor,user"  // Must be one of the listed values
-"regex:^[A-Z]+$"        // Must match the given pattern</code></pre>
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Available rules</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <table class="w-full text-sm">
+                        <thead>
+                        <tr class="border-b border-zinc-800">
+                            <th class="text-left py-3 pr-6 text-white font-medium">Rule</th>
+                            <th class="text-left py-3 text-white font-medium">Description</th>
+                        </tr>
+                        </thead>
+                        <tbody class="text-gray-400">
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">required</td><td class="py-3">Field must not be null or empty</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">email</td><td class="py-3">Must be a valid email address</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">min:8</td><td class="py-3">Minimum 8 characters</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">max:255</td><td class="py-3">Maximum 255 characters</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">between:3,20</td><td class="py-3">Length or value between 3 and 20</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">numeric</td><td class="py-3">Must be a number</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">integer</td><td class="py-3">Must be an integer</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">alpha</td><td class="py-3">Letters only</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">alphanumeric</td><td class="py-3">Letters and numbers only</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">url</td><td class="py-3">Must be a valid URL</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">confirmed</td><td class="py-3">Must match <code>field_confirmation</code></td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">unique:users,email</td><td class="py-3">Must not exist in table/column</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">in:admin,editor,user</td><td class="py-3">Must be one of the listed values</td></tr>
+                        <tr><td class="py-3 pr-6 text-red-400 font-mono">regex:^[A-Z]+$</td><td class="py-3">Must match the given pattern</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Displaying errors in templates</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <p class="text-gray-400 mb-4">
-                    The <span class="text-white">error()</span> and <span class="text-white">old()</span> helpers are available in all Pebble templates when you pass <span class="text-white">errors</span> and <span class="text-white">old</span> to the view.
-                </p>
-                <pre class="line-numbers"><code class="language-twig">&lt;form method="POST" action="/register"&gt;
-    {{ csrf_field() | raw }}
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Displaying errors in templates</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">The <code class="text-red-400">error()</code> and <code class="text-red-400">old()</code> helpers are available in all Pebble templates when you pass <code class="text-red-400">errors</code> and <code class="text-red-400">old</code> to the view.</p>
+                    <pre><code class="language-twig">&lt;form method="POST" action="/register"&gt;
+    &#123;&#123; csrf_field() | raw &#125;&#125;
 
     &lt;input
         type="text"
         name="username"
-        value="{{ old('username') }}"
+        value="&#123;&#123; old('username') &#125;&#125;"
     &gt;
-    {% if error('username') %}
-        &lt;span class="error"&gt;{{ error('username') }}&lt;/span&gt;
-    {% endif %}
+    &#123;% if error('username') %&#125;
+        &lt;span class="error"&gt;&#123;&#123; error('username') &#125;&#125;&lt;/span&gt;
+    &#123;% endif %&#125;
 
     &lt;input
         type="email"
         name="email"
-        value="{{ old('email') }}"
+        value="&#123;&#123; old('email') &#125;&#125;"
     &gt;
-    {% if error('email') %}
-        &lt;span class="error"&gt;{{ error('email') }}&lt;/span&gt;
-    {% endif %}
+    &#123;% if error('email') %&#125;
+        &lt;span class="error"&gt;&#123;&#123; error('email') &#125;&#125;&lt;/span&gt;
+    &#123;% endif %&#125;
 
     &lt;button type="submit"&gt;Register&lt;/button&gt;
 &lt;/form&gt;</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Validation in LiveComponents</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <p class="text-gray-400 mb-4">
-                    Use <span class="text-white">LiveComponentValidator</span> to validate component state directly, without an HTTP request.
-                </p>
-                <pre class="line-numbers"><code class="language-java">@LiveComponentImpl
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Validation in LiveComponents</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Use <code class="text-red-400">LiveComponentValidator</code> to validate component state directly, without an HTTP request.</p>
+                    <pre><code class="language-java">@LiveComponentImpl
 public class RegisterForm extends LiveComponent
 {
     @State
@@ -138,18 +146,28 @@ public class RegisterForm extends LiveComponent
         return "components/register-form.html";
     }
 }</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
-            <div class="text-blue-400 mb-2">💡 Behavior</div>
-            <ul class="text-gray-400 text-sm space-y-1">
-                <li>• Rules are evaluated in order — validation stops at the first failure per field</li>
-                <li>• Only validated fields are returned in the data map</li>
-                <li>• <span class="text-white">validate()</span> throws a <span class="text-white">ValidationException</span> on failure</li>
-                <li>• <span class="text-white">validateSafe()</span> returns a <span class="text-white">ValidationResult</span> without throwing</li>
-                <li>• <span class="text-white">unique:</span> checks against your ActiveJDBC models automatically</li>
-            </ul>
+            <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
+                <div class="text-blue-400 mb-2">💡 Behavior</div>
+                <ul class="text-gray-400 text-sm space-y-1">
+                    <li>• Rules are evaluated in order — validation stops at the first failure per field</li>
+                    <li>• Only validated fields are returned in the data map</li>
+                    <li>• <code class="text-red-400">validate()</code> throws a <code class="text-red-400">ValidationException</code> on failure</li>
+                    <li>• <code class="text-red-400">validateSafe()</code> returns a <code class="text-red-400">ValidationResult</code> without throwing</li>
+                    <li>• <code class="text-red-400">unique:</code> checks against your ActiveJDBC models automatically</li>
+                </ul>
+            </div>
+
         </div>
+    </section>
+
+    <div class="flex items-center justify-between pt-8 border-t border-zinc-900 text-sm">
+        <a href="/docs/templates" class="text-gray-400 hover:text-white transition-colors">← Templates</a>
+        <a href="/docs/csrf" class="text-gray-400 hover:text-white transition-colors">CSRF →</a>
     </div>
-</section>
+
+</div>
+
+{% endblock %}

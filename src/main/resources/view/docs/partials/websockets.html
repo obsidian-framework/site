@@ -1,16 +1,18 @@
-<section id="websockets">
-    <h2 class="text-3xl font-bold text-white mb-6">WebSockets</h2>
+{% extends "view/layout/docs.html" %}
+{% block content %}
 
-    <p class="text-gray-400 mb-6">
-        WebSocket handlers enable bi-directional real-time communication between client and server.
-        Perfect for chat applications, live collaboration, and gaming.
-    </p>
+<div class="space-y-16">
 
-    <div class="space-y-6">
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Basic WebSocket handler</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">@org.eclipse.jetty.websocket.api.annotations.WebSocket
+    <section id="websockets">
+        <h2 class="text-3xl font-bold text-white mb-2">WebSockets</h2>
+        <p class="text-gray-400 mb-8">WebSocket handlers enable bi-directional real-time communication between client and server. Perfect for chat applications, live collaboration, and gaming.</p>
+
+        <div class="space-y-8">
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Basic WebSocket handler</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">@org.eclipse.jetty.websocket.api.annotations.WebSocket
 @WebSocket("/ws/chat")
 public class ChatHandler {
 
@@ -18,12 +20,12 @@ public class ChatHandler {
 
     @OnWebSocketConnect
     public void onConnect(Session session) throws IOException {
+        users.put(session, "anonymous");
         session.getRemote().sendString("Welcome to the chat!");
     }
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws IOException {
-        // Broadcast to all connected users
         for (Session s : users.keySet()) {
             if (s.isOpen()) {
                 s.getRemote().sendString(message);
@@ -36,16 +38,15 @@ public class ChatHandler {
         users.remove(session);
     }
 }</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Client-side JavaScript</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-javascript">const ws = new WebSocket('ws://localhost:8888/ws/chat');
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Client-side JavaScript</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-javascript">const ws = new WebSocket('ws://localhost:8080/ws/chat');
 
 ws.onopen = () => {
-    console.log('Connected!');
     ws.send('Hello server!');
 };
 
@@ -56,35 +57,40 @@ ws.onmessage = (event) => {
 ws.onclose = () => {
     console.log('Disconnected');
 };</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Path convention</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <p class="text-gray-400 mb-4">
-                    Use the <span class="text-white">/ws/</span> prefix for WebSocket endpoints to avoid conflicts with HTTP routes.
-                </p>
-                <pre class="line-numbers"><code class="language-java">// ✅ Good - No conflict
-@WebSocket("/ws/chat")      // WebSocket endpoint
-@GET("/chat")               // HTTP route (serves HTML page)
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Path convention</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Use the <code class="text-red-400">/ws/</code> prefix for WebSocket endpoints to avoid conflicts with HTTP routes.</p>
+                    <pre><code class="language-java">// ✅ No conflict
+@WebSocket("/ws/chat")  // WebSocket endpoint
+@GET("/chat")           // HTTP route (serves the HTML page)
 
-// ❌ Bad - Path conflict
-@WebSocket("/chat")         // ⚠️ Conflicts with HTTP route
-@GET("/chat")               // ⚠️ Conflicts with WebSocket</code></pre>
+// ❌ Conflict
+@WebSocket("/chat")     // Conflicts with HTTP route below
+@GET("/chat")</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
-            <div class="text-blue-400 mb-2">💡 Important</div>
-            <p class="text-gray-400 text-sm mb-3">
-                WebSocket handlers must be placed in the <span class="text-white">fr.kainovaii.obsidian.app.websockets</span> package
-                and require <span class="text-white">both</span> annotations:
-            </p>
-            <ul class="text-gray-400 text-sm space-y-1 ml-4">
-                <li>• <span class="text-white">@WebSocket("/path")</span> - Obsidian annotation</li>
-                <li>• <span class="text-white">@org.eclipse.jetty.websocket.api.annotations.WebSocket</span> - Jetty annotation</li>
-            </ul>
+            <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
+                <div class="text-blue-400 mb-2">💡 Important</div>
+                <p class="text-gray-400 text-sm mb-3">WebSocket handlers require <strong class="text-white">both</strong> annotations and must be placed in a subpackage of your main package (e.g. <code class="text-red-400">websockets/</code>):</p>
+                <ul class="text-gray-400 text-sm space-y-1 ml-4">
+                    <li>• <code class="text-red-400">@WebSocket("/path")</code> — Obsidian annotation</li>
+                    <li>• <code class="text-red-400">@org.eclipse.jetty.websocket.api.annotations.WebSocket</code> — Jetty annotation</li>
+                </ul>
+            </div>
+
         </div>
+    </section>
+
+    <div class="flex items-center justify-between pt-8 border-t border-zinc-900 text-sm">
+        <a href="/docs/storage" class="text-gray-400 hover:text-white transition-colors">← Storage</a>
+        <a href="/docs/sse" class="text-gray-400 hover:text-white transition-colors">Server-Sent Events →</a>
     </div>
-</section>
+
+</div>
+
+{% endblock %}

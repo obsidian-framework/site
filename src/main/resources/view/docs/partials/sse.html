@@ -1,34 +1,32 @@
-<section id="sse">
-    <h2 class="text-3xl font-bold text-white mb-6">Server-Sent Events (SSE)</h2>
+{% extends "view/layout/docs.html" %}
+{% block content %}
 
-    <p class="text-gray-400 mb-6">
-        SSE enables real-time server-to-client streaming. Perfect for notifications, live dashboards,
-        and activity feeds. Automatic reconnection included.
-    </p>
+<div class="space-y-16">
 
-    <div class="space-y-6">
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Basic SSE endpoint</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">@Controller
-public class NotificationController {
+    <section id="sse">
+        <h2 class="text-3xl font-bold text-white mb-2">Server-Sent Events (SSE)</h2>
+        <p class="text-gray-400 mb-8">SSE enables real-time server-to-client streaming. Perfect for notifications, live dashboards, and activity feeds. Automatic reconnection included.</p>
+
+        <div class="space-y-8">
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Basic SSE endpoint</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">@Controller
+public class NotificationController extends BaseController {
 
     @SSE(value = "/notifications/stream", name = "notifications.stream")
-    public Object stream(Request req, Response res) {
+    public Object stream(Request req, Response res) throws Exception {
         res.raw().setCharacterEncoding("UTF-8");
         PrintWriter writer = res.raw().getWriter();
 
         try {
             for (int i = 0; i &lt; 10; i++) {
                 String notification = String.format(
-                    "{\"type\":\"Info\",\"message\":\"Event %d\"}",
-                    i
+                    "{\"type\":\"info\",\"message\":\"Event %d\"}", i
                 );
-
-                // SSE format: "data: JSON\n\n"
                 writer.write("data: " + notification + "\n\n");
                 writer.flush();
-
                 Thread.sleep(5000);
             }
         } catch (Exception e) {
@@ -40,53 +38,58 @@ public class NotificationController {
         return null;
     }
 }</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Client-side JavaScript</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-javascript">const eventSource = new EventSource('/notifications/stream');
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Message format</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Each event must end with two newlines (<code class="text-red-400">\n\n</code>).</p>
+                    <pre><code class="language-java">// Simple text
+writer.write("data: Hello World\n\n");
+
+// JSON (recommended)
+writer.write("data: {\"user\":\"Alice\",\"message\":\"Hi!\"}\n\n");
+
+// Named event
+writer.write("event: notification\n");
+writer.write("data: {\"text\":\"New message\"}\n\n");</code></pre>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Client-side JavaScript</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-javascript">const eventSource = new EventSource('/notifications/stream');
 
 eventSource.onmessage = (event) => {
     const data = JSON.parse(event.data);
     console.log('Notification:', data);
 };
 
-eventSource.onerror = (error) => {
-    console.error('Connection error');
+eventSource.onerror = () => {
     // Automatically reconnects
 };
 
 // Close when done
 eventSource.close();</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Message format</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <p class="text-gray-400 mb-4">
-                    SSE messages follow a simple text format. Each event must end with two newlines.
-                </p>
-                <pre class="line-numbers"><code class="language-java">// Simple text message
-writer.write("data: Hello World\n\n");
-
-// JSON message (recommended)
-writer.write("data: {\"user\":\"Alice\",\"message\":\"Hi!\"}\n\n");
-
-// Named event (optional)
-writer.write("event: notification\n");
-writer.write("data: {\"text\":\"New message\"}\n\n");</code></pre>
+            <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
+                <div class="text-blue-400 mb-2">💡 Important</div>
+                <p class="text-gray-400 text-sm">Always set UTF-8 encoding at the start of your handler to avoid charset issues:</p>
+                <pre class="mt-3"><code class="language-java">res.raw().setCharacterEncoding("UTF-8");</code></pre>
             </div>
-        </div>
 
-        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
-            <div class="text-blue-400 mb-2">💡 Important</div>
-            <p class="text-gray-400 text-sm mb-3">
-                Always set UTF-8 encoding to avoid charset issues:
-            </p>
-            <pre class="text-sm"><code class="language-java">res.raw().setCharacterEncoding("UTF-8");</code></pre>
         </div>
+    </section>
+
+    <div class="flex items-center justify-between pt-8 border-t border-zinc-900 text-sm">
+        <a href="/docs/websockets" class="text-gray-400 hover:text-white transition-colors">← WebSockets</a>
+        <a href="/docs/live-components" class="text-gray-400 hover:text-white transition-colors">LiveComponents →</a>
     </div>
-</section>
+
+</div>
+
+{% endblock %}

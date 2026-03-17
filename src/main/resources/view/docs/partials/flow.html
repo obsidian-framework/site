@@ -1,70 +1,65 @@
-<section id="flow">
-    <h2 class="text-3xl font-bold text-white mb-6">Flow (Navigation)</h2>
+{% extends "view/layout/docs.html" %}
+{% block content %}
 
-    <p class="text-gray-400 mb-6">
-        Flow is a client-side navigation system that intercepts link clicks and form submissions
-        to perform AJAX-based page transitions without full reloads. It automatically re-initializes
-        LiveComponents and re-executes scripts after each navigation.
-    </p>
+<div class="space-y-16">
 
-    <div class="space-y-6">
+    <section id="flow">
+        <h2 class="text-3xl font-bold text-white mb-2">Flow</h2>
+        <p class="text-gray-400 mb-8">Flow is a client-side navigation system that intercepts link clicks and form submissions to perform AJAX-based page transitions without full reloads. It automatically re-initializes LiveComponents and re-executes scripts after each navigation.</p>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">How it works</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <p class="text-gray-400 text-sm mb-4">
-                    Flow is initialized automatically on page load. It attaches three global listeners:
-                </p>
-                <ul class="text-gray-400 text-sm space-y-1 ml-4">
-                    <li>• <span class="text-white">click</span> — intercepts <span class="text-white">&lt;a&gt;</span> tag navigation (same-origin only)</li>
-                    <li>• <span class="text-white">submit</span> — intercepts GET and POST form submissions</li>
-                    <li>• <span class="text-white">popstate</span> — handles browser back/forward buttons</li>
-                </ul>
+        <div class="space-y-8">
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">How it works</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-6">Flow is initialized automatically on page load. It attaches three global listeners:</p>
+                    <ul class="text-gray-400 text-sm space-y-1 ml-4 mb-6">
+                        <li>• <code class="text-white">click</code> — intercepts <code class="text-white">&lt;a&gt;</code> tag navigation (same-origin only)</li>
+                        <li>• <code class="text-white">submit</code> — intercepts GET and POST form submissions</li>
+                        <li>• <code class="text-white">popstate</code> — handles browser back/forward with scroll restoration</li>
+                    </ul>
+
+                    <div class="border-t border-zinc-800 pt-6 space-y-4 text-sm">
+                        <div class="flex items-start gap-4">
+                            <span class="text-red-400 font-medium shrink-0 w-40">morphdom diff</span>
+                            <span class="text-gray-400">Instead of replacing the entire <code class="text-red-400">&lt;body&gt;</code>, Flow uses <a href="https://github.com/patrick-steele-idem/morphdom" target="_blank" class="text-red-400 hover:underline">morphdom</a> to diff and patch only the nodes that actually changed. This preserves scroll position, focus, and CSS transitions.</span>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <span class="text-red-400 font-medium shrink-0 w-40">Head sync</span>
+                            <span class="text-gray-400"><code class="text-red-400">&lt;meta&gt;</code> and <code class="text-red-400">&lt;link&gt;</code> tags are synced on every navigation — new ones are added, stale ones removed. Scripts are skipped to avoid re-loading JS.</span>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <span class="text-red-400 font-medium shrink-0 w-40">Script re-execution</span>
+                            <span class="text-gray-400">Inline <code class="text-red-400">&lt;script&gt;</code> tags in the new body are re-executed automatically. Flow's own script and the LiveComponents runtime are skipped — they're already loaded.</span>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <span class="text-red-400 font-medium shrink-0 w-40">View Transitions</span>
+                            <span class="text-gray-400">If the browser supports the <a href="https://developer.chrome.com/docs/web-platform/view-transitions/" target="_blank" class="text-red-400 hover:underline">View Transitions API</a> (Chrome 111+), Flow wraps DOM updates in <code class="text-red-400">document.startViewTransition()</code> for smooth animated page switches.</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Including Flow in your templates</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <p class="text-gray-400 mb-4">
-                    Use the <span class="text-white">{{ flow_scripts }}</span> global variable in your base Pebble template
-                    to inject the Flow script tag. The variable is provided automatically — no manual registration needed.
-                    The <span class="text-white">| raw</span> filter is required, otherwise Pebble escapes the tag and renders it as plain text.
-                </p>
-                <pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-&lt;head&gt;
-    &lt;title&gt;My App&lt;/title&gt;
-&lt;/head&gt;
-&lt;body&gt;
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Include in your layout</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Add <code class="text-red-400">&#123;&#123; flow_scripts | raw &#125;&#125;</code> in your base layout. The <code class="text-red-400">| raw</code> filter is required — without it Pebble escapes the script tag.</p>
+                    <pre><code class="language-html">&lt;body&gt;
     &#123;% block content %&#125;&#123;% endblock %&#125;
-
     &#123;&#123; flow_scripts | raw &#125;&#125;
-&lt;/body&gt;
-&lt;/html&gt;</code></pre>
+&lt;/body&gt;</code></pre>
+                    <p class="text-gray-500 text-xs mt-3">In production, the script is versioned as <code class="text-red-400">flow.js?v=1.0.0</code>. In development, a timestamp is used to force re-fetch on every restart.</p>
+                </div>
             </div>
-        </div>
 
-        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
-            <div class="text-blue-400 mb-2">💡 Cache busting</div>
-            <p class="text-gray-400 text-sm">
-                In <span class="text-white">production</span>, the script is served as
-                <span class="text-white">flow.js?v=1.0.0</span>. In all other environments,
-                the current timestamp is used — forcing the browser to re-fetch the script on every restart.
-            </p>
-        </div>
-
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Opting out</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <p class="text-gray-400 mb-4">
-                    Add <span class="text-white">data-flow="false"</span> to any link or form to bypass Flow
-                    and trigger a standard full-page navigation instead.
-                </p>
-                <pre class="line-numbers"><code class="language-html">&lt;!-- Standard AJAX navigation (default) --&gt;
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Opting out</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Add <code class="text-red-400">data-flow="false"</code> to any link or form to bypass Flow and trigger a full page reload instead.</p>
+                    <pre><code class="language-html">&lt;!-- Default — AJAX navigation --&gt;
 &lt;a href="/dashboard"&gt;Dashboard&lt;/a&gt;
 
-&lt;!-- Full page reload --&gt;
+&lt;!-- Full reload --&gt;
 &lt;a href="/download/report.pdf" data-flow="false"&gt;Download PDF&lt;/a&gt;
 
 &lt;!-- Form opt-out --&gt;
@@ -72,23 +67,16 @@
     &lt;input type="file" name="file"&gt;
     &lt;button type="submit"&gt;Upload&lt;/button&gt;
 &lt;/form&gt;</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Listening to navigation events</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <p class="text-gray-400 mb-4">
-                    Flow dispatches a <span class="text-white">obsidian:flow:load</span> event on
-                    <span class="text-white">window</span> after every successful navigation. Use it to run
-                    custom logic (analytics, UI resets, etc.) without touching the core system.
-                </p>
-                <pre class="line-numbers"><code class="language-javascript">window.addEventListener('obsidian:flow:load', (event) => {
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Navigation events</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Flow dispatches events on <code class="text-red-400">window</code> after each navigation — use them to re-initialize third-party libraries or track page views.</p>
+                    <pre><code class="language-javascript">window.addEventListener('obsidian:flow:load', (event) => {
     console.log('Navigated to:', event.detail.url);
-
-    // Re-initialize third-party libraries
     hljs.highlightAll();
-    // Track page views
     analytics.page(event.detail.url);
 });
 
@@ -96,146 +84,122 @@
 window.addEventListener('obsidian:flow:redirect', (event) => {
     console.log('Redirected from', event.detail.from, 'to', event.detail.to);
 });</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Programmatic navigation</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <p class="text-gray-400 mb-4">
-                    You can navigate programmatically via the global <span class="text-white">window.ObsidianFlow</span> instance.
-                </p>
-                <pre class="line-numbers"><code class="language-javascript">// Simple GET navigation
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Programmatic navigation</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-javascript">// GET navigation
 window.ObsidianFlow.navigate('/profile');
 
-// Without pushing to browser history
+// Without pushing to history
 window.ObsidianFlow.navigate('/modal-content', { pushState: false });
 
-// POST navigation with FormData
+// POST navigation
 const data = new FormData();
 data.append('username', 'alice');
 window.ObsidianFlow.navigate('/login', { method: 'POST', body: data });</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Per-link timeout</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <p class="text-gray-400 mb-4">
-                    The global fetch timeout is <span class="text-white">8000ms</span>. Override it on a per-link basis
-                    via <span class="text-white">data-flow-timeout</span> for routes that are known to be slower.
-                </p>
-                <pre class="line-numbers"><code class="language-html">&lt;a href="/export/report" data-flow-timeout="15000"&gt;Export report&lt;/a&gt;</code></pre>
-            </div>
-        </div>
-
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Customizing the progress bar</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <p class="text-gray-400 mb-4">
-                    The progress bar color is controlled via a CSS variable. Override it anywhere in your stylesheet.
-                </p>
-                <pre class="line-numbers"><code class="language-css">:root {
-    --obsidian-flow-color: #6366f1; /* indigo */
-}</code></pre>
-            </div>
-        </div>
-
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Path conventions</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <p class="text-gray-400 mb-4">
-                    Flow skips same-page anchor links automatically.
-                    Avoid naming HTTP routes the same as WebSocket endpoints — use the
-                    <span class="text-white">/ws/</span> prefix for WebSocket paths to prevent conflicts.
-                </p>
-                <pre class="line-numbers"><code class="language-java">// ✅ No conflict — Flow intercepts /chat, WebSocket is on /ws/chat
-@GET("/chat")
-@WebSocket("/ws/chat")
-
-// ❌ Conflict — Flow and WebSocket fight over the same path
-@GET("/chat")
-@WebSocket("/chat")</code></pre>
-            </div>
-        </div>
-
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Prefetch &amp; server-side detection</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <p class="text-gray-400 mb-4">
-                    Flow prefetches links on hover to reduce perceived navigation latency. Prefetch requests
-                    include the <span class="text-white">X-Obsidian-Prefetch: 1</span> header so the server
-                    can skip side effects while still enforcing security checks.
-                </p>
-                <pre class="line-numbers"><code class="language-java">@GET("/dashboard")
-public void dashboard(Request req, Response res) throws IOException {
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Prefetch</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Flow prefetches links on hover to reduce perceived latency. Prefetch requests include the <code class="text-red-400">X-Obsidian-Prefetch: 1</code> header — use it server-side to skip analytics or side effects.</p>
+                    <pre><code class="language-java">@GET("/dashboard")
+public Object dashboard(Request req, Response res) {
     if (!req.attribute("prefetch")) {
         analytics.trackPageView(req);
     }
-    res.render("dashboard.html");
+    return render("dashboard.html", Map.of());
 }</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">API reference</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <table class="w-full text-sm text-gray-400">
-                    <thead>
-                    <tr class="border-b border-zinc-800 text-white text-left">
-                        <th class="pb-3 pr-6">Method / Property / Event</th>
-                        <th class="pb-3 pr-6">Type</th>
-                        <th class="pb-3">Description</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr class="border-b border-zinc-800/50">
-                        <td class="py-3 pr-6 text-white font-mono">navigate(url, options?)</td>
-                        <td class="py-3 pr-6">Promise&lt;void&gt;</td>
-                        <td class="py-3">Navigates to the given URL. Options: <span class="text-white">pushState</span> (bool), <span class="text-white">method</span> (string), <span class="text-white">body</span> (FormData), <span class="text-white">timeout</span> (number).</td>
-                    </tr>
-                    <tr class="border-b border-zinc-800/50">
-                        <td class="py-3 pr-6 text-white font-mono">navigating</td>
-                        <td class="py-3 pr-6">boolean</td>
-                        <td class="py-3">True while a navigation fetch is in progress.</td>
-                    </tr>
-                    <tr class="border-b border-zinc-800/50">
-                        <td class="py-3 pr-6 text-white font-mono">currentUrl</td>
-                        <td class="py-3 pr-6">string</td>
-                        <td class="py-3">The URL of the last successfully loaded page.</td>
-                    </tr>
-                    <tr class="border-b border-zinc-800/50">
-                        <td class="py-3 pr-6 text-white font-mono">timeout</td>
-                        <td class="py-3 pr-6">number</td>
-                        <td class="py-3">Global fetch timeout in milliseconds. Default: <span class="text-white">8000</span>. Override per link via <span class="text-white">data-flow-timeout</span>.</td>
-                    </tr>
-                    <tr class="border-b border-zinc-800/50">
-                        <td class="py-3 pr-6 text-white font-mono">obsidian:flow:load</td>
-                        <td class="py-3 pr-6">CustomEvent</td>
-                        <td class="py-3">Dispatched on <span class="text-white">window</span> after each navigation. Detail: <span class="text-white">{ url: string }</span>.</td>
-                    </tr>
-                    <tr>
-                        <td class="py-3 pr-6 text-white font-mono">obsidian:flow:redirect</td>
-                        <td class="py-3 pr-6">CustomEvent</td>
-                        <td class="py-3">Dispatched on <span class="text-white">window</span> when a POST navigation lands on a different URL. Detail: <span class="text-white">{ from: string, to: string }</span>.</td>
-                    </tr>
-                    </tbody>
-                </table>
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Per-link timeout & progress bar</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <div class="space-y-6">
+                        <div>
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Override timeout per link (default: 8000ms)</div>
+                            <pre><code class="language-html">&lt;a href="/export/report" data-flow-timeout="15000"&gt;Export report&lt;/a&gt;</code></pre>
+                        </div>
+                        <div class="border-t border-zinc-800 pt-6">
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Customize progress bar color</div>
+                            <pre><code class="language-css">:root {
+    --obsidian-flow-color: #6366f1;
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
-            <div class="text-blue-400 mb-2">💡 Important</div>
-            <p class="text-gray-400 text-sm mb-3">
-                Add <span class="text-white">data-flow="false"</span> on any link or form that must trigger
-                a full reload — file uploads, external redirects, or OAuth flows.
-            </p>
-            <ul class="text-gray-400 text-sm space-y-1 ml-4">
-                <li>• Forms with <span class="text-white">live:submit</span> are skipped automatically — handled by LiveComponents</li>
-                <li>• External links are never intercepted regardless of <span class="text-white">data-flow</span></li>
-                <li>• Override <span class="text-white">--obsidian-flow-color</span> to match your brand</li>
-            </ul>
-        </div>
+            <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
+                <div class="text-blue-400 mb-2">💡 Important</div>
+                <ul class="text-gray-400 text-sm space-y-1">
+                    <li>• Use <code class="text-red-400">data-flow="false"</code> on file uploads, external redirects, and OAuth flows</li>
+                    <li>• Forms with <code class="text-red-400">live:submit</code> are skipped automatically — handled by LiveComponents</li>
+                    <li>• External links are never intercepted regardless of <code class="text-red-400">data-flow</code></li>
+                    <li>• Use the <code class="text-red-400">/ws/</code> prefix for WebSocket paths to avoid conflicts with Flow</li>
+                </ul>
+            </div>
 
+            <div>
+                <div class="text-gray-400 text-sm mb-3">API reference</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <table class="w-full text-sm">
+                        <thead>
+                        <tr class="border-b border-zinc-800">
+                            <th class="text-left py-3 pr-6 text-white font-medium">Method / Property / Event</th>
+                            <th class="text-left py-3 pr-6 text-white font-medium">Type</th>
+                            <th class="text-left py-3 text-white font-medium">Description</th>
+                        </tr>
+                        </thead>
+                        <tbody class="text-gray-400">
+                        <tr class="border-b border-zinc-800">
+                            <td class="py-3 pr-6 text-red-400 font-mono">navigate(url, options?)</td>
+                            <td class="py-3 pr-6">Promise&lt;void&gt;</td>
+                            <td class="py-3">Navigates to the given URL. Options: <code>pushState</code>, <code>method</code>, <code>body</code>, <code>timeout</code>.</td>
+                        </tr>
+                        <tr class="border-b border-zinc-800">
+                            <td class="py-3 pr-6 text-red-400 font-mono">navigating</td>
+                            <td class="py-3 pr-6">boolean</td>
+                            <td class="py-3">True while a navigation fetch is in progress.</td>
+                        </tr>
+                        <tr class="border-b border-zinc-800">
+                            <td class="py-3 pr-6 text-red-400 font-mono">currentUrl</td>
+                            <td class="py-3 pr-6">string</td>
+                            <td class="py-3">URL of the last successfully loaded page.</td>
+                        </tr>
+                        <tr class="border-b border-zinc-800">
+                            <td class="py-3 pr-6 text-red-400 font-mono">timeout</td>
+                            <td class="py-3 pr-6">number</td>
+                            <td class="py-3">Global fetch timeout in ms. Default: 8000. Override per link via <code>data-flow-timeout</code>.</td>
+                        </tr>
+                        <tr class="border-b border-zinc-800">
+                            <td class="py-3 pr-6 text-red-400 font-mono">obsidian:flow:load</td>
+                            <td class="py-3 pr-6">CustomEvent</td>
+                            <td class="py-3">Dispatched after each navigation. Detail: <code>{ url: string }</code>.</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 pr-6 text-red-400 font-mono">obsidian:flow:redirect</td>
+                            <td class="py-3 pr-6">CustomEvent</td>
+                            <td class="py-3">Dispatched when a POST lands on a different URL. Detail: <code>{ from: string, to: string }</code>.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <div class="flex items-center justify-between pt-8 border-t border-zinc-900 text-sm">
+        <a href="/docs/live-components" class="text-gray-400 hover:text-white transition-colors">← LiveComponents</a>
+        <a href="/docs/cli" class="text-gray-400 hover:text-white transition-colors">CLI →</a>
     </div>
-</section>
+
+</div>
+
+{% endblock %}

@@ -1,74 +1,77 @@
-<section id="cache">
-    <h2 class="text-3xl font-bold text-white mb-6">Cache</h2>
-    <p class="text-gray-400 mb-6">
-        Obsidian provides a unified cache facade backed by a swappable driver. Two drivers are available out of the box: an in-memory store for development, and Redis for production. Configuration is handled via environment variables — no code changes required to switch.
-    </p>
+{% extends "view/layout/docs.html" %}
+{% block content %}
 
-    <div class="space-y-6">
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Environment configuration</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-bash"># Use in-memory driver (default)
-CACHE_DRIVER=memory
+<div class="space-y-16">
 
-# Use Redis driver
-CACHE_DRIVER=redis
+    <section id="cache">
+        <h2 class="text-3xl font-bold text-white mb-2">Cache</h2>
+        <p class="text-gray-400 mb-8">Obsidian provides a unified cache facade backed by a swappable driver. Two drivers are available out of the box: an in-memory store for development, and Redis for production. Configuration is handled via environment variables — no code changes required to switch.</p>
+
+        <div class="space-y-8">
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Environment configuration</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <div class="space-y-6">
+                        <div>
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">In-memory (default)</div>
+                            <pre><code class="language-bash">CACHE_DRIVER=memory</code></pre>
+                        </div>
+                        <div class="border-t border-zinc-800 pt-6">
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Redis</div>
+                            <pre><code class="language-bash">CACHE_DRIVER=redis
 REDIS_HOST=127.0.0.1
 REDIS_PORT=6379
 REDIS_PASSWORD=secret</code></pre>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Store and retrieve</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">// Store a value for 60 seconds
-Cache.put("user:42", user, 60);
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Store and retrieve</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">Cache.put("user:42", user, 60);  // Store for 60 seconds
 
-// Retrieve (cast is inferred via generics)
-User user = Cache.get("user:42");
+User user = Cache.get("user:42"); // Retrieve
 
-// Check existence without fetching
-if (Cache.has("user:42")) { ... }
+if (Cache.has("user:42")) { ... } // Check existence
 
-// Remove a key
-Cache.forget("user:42");</code></pre>
+Cache.forget("user:42");          // Remove</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">remember — cache-aside pattern</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">// Returns the cached value if present.
-// Otherwise, runs the supplier, caches the result, and returns it.
-List&lt;Faction&gt; factions = Cache.remember(
-    "factions:all",
+            <div>
+                <div class="text-gray-400 text-sm mb-3">remember — cache-aside pattern</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Returns the cached value if present. Otherwise runs the supplier, caches the result, and returns it.</p>
+                    <pre><code class="language-java">List&lt;Article&gt; articles = Cache.remember(
+    "articles:all",
     300,
-    () -> factionRepository.findAll()
+    () -> articleRepository.findAll()
 );</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Batch operations</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">// Store multiple entries with a shared TTL
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Batch operations</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">// Store multiple entries with a shared TTL
 Map&lt;String, Object&gt; entries = new HashMap&lt;&gt;();
 entries.put("user:1", alice);
 entries.put("user:2", bob);
 Cache.putAll(entries, 120);
 
 // Retrieve multiple keys in order
-List&lt;String&gt; keys = List.of("user:1", "user:2");
-List&lt;User&gt; users = Cache.getAll(keys);</code></pre>
+List&lt;User&gt; users = Cache.getAll(List.of("user:1", "user:2"));</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Custom driver</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">public class MyCacheDriver implements CacheDriver
-{
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Custom driver</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">public class MyCacheDriver implements CacheDriver {
+
     @Override
     public void put(String key, Object value, int ttlSeconds) { ... }
 
@@ -78,19 +81,29 @@ List&lt;User&gt; users = Cache.getAll(keys);</code></pre>
     // implement has(), forget(), putAll(), getAll()
 }
 
-// Register it before the server starts
+// Register before the server starts
 Cache.setDriver(new MyCacheDriver());</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
-            <div class="text-blue-400 mb-2">💡 Behaviour</div>
-            <ul class="text-gray-400 text-sm space-y-1">
-                <li>• <span class="text-white">getAll()</span> preserves key order — <span class="text-white">null</span> is returned for missing or expired entries</li>
-                <li>• Redis batch ops use Jedis pipelining — a single round-trip for any number of keys</li>
-                <li>• <span class="text-white">remember()</span> is not atomic — under concurrent load, the supplier may run more than once</li>
-                <li>• The InMemory driver evicts lazily on <span class="text-white">get()</span> — no background sweep</li>
-            </ul>
+            <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
+                <div class="text-blue-400 mb-2">💡 Behaviour</div>
+                <ul class="text-gray-400 text-sm space-y-1">
+                    <li>• <code class="text-red-400">getAll()</code> preserves key order — <code class="text-red-400">null</code> is returned for missing or expired entries</li>
+                    <li>• Redis batch ops use Jedis pipelining — a single round-trip for any number of keys</li>
+                    <li>• <code class="text-red-400">remember()</code> is not atomic — under concurrent load, the supplier may run more than once</li>
+                    <li>• The InMemory driver evicts lazily on <code class="text-red-400">get()</code> — no background sweep</li>
+                </ul>
+            </div>
+
         </div>
+    </section>
+
+    <div class="flex items-center justify-between pt-8 border-t border-zinc-900 text-sm">
+        <a href="/docs/security" class="text-gray-400 hover:text-white transition-colors">← Security</a>
+        <a href="/docs/storage" class="text-gray-400 hover:text-white transition-colors">Storage →</a>
     </div>
-</section>
+
+</div>
+
+{% endblock %}

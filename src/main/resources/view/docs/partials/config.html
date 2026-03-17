@@ -1,35 +1,53 @@
-<section id="config">
-    <h2 class="text-3xl font-bold text-white mb-6">Configuration</h2>
-    <p class="text-gray-400 mb-6">
-        Configuration files let you centralize and apply global settings at startup. Any class annotated with <span class="text-white">@Config</span> and implementing <span class="text-white">ConfigInterface</span> is automatically discovered by the framework — no manual registration needed.
-    </p>
+{% extends "view/layout/docs.html" %}
+{% block content %}
 
-    <div class="space-y-6">
-        <div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">@Config
-public class NotifConfig implements ConfigInterface
-{
+<div class="space-y-16">
+
+    <section id="config">
+        <h2 class="text-3xl font-bold text-white mb-2">Config</h2>
+        <p class="text-gray-400 mb-8">Configuration classes let you centralize and apply global settings at startup. Any class annotated with <code class="text-red-400">@Config</code> and implementing <code class="text-red-400">ConfigInterface</code> is automatically discovered by the framework — no manual registration needed.</p>
+
+        <div class="space-y-8">
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Create a config class</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">@Config
+public class NotifConfig implements ConfigInterface {
+
     @Override
-    public void configure()
-    {
+    public void configure() {
         FlashConfig.setDuration(5000);
 
+        // Options: top-right, top-left, bottom-right,
+        //          bottom-left, top-center, bottom-center
         FlashConfig.setPosition("top-right");
 
         FlashConfig.setCustomCSS("""
-        .flash-notification {
-            border-radius: 1rem;
-            font-size: 0.875rem;
-        }
-        .flash-success {
-            background: linear-gradient(to right, #10b981, #059669);
-        }
+            .flash-notification {
+                border-radius: 1rem;
+                font-size: 0.875rem;
+            }
+            .flash-success {
+                background: linear-gradient(to right, #10b981, #059669);
+            }
         """);
     }
 }</code></pre>
+                </div>
             </div>
-        </div>
-    </div>
 
-</section>
+            <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
+                <div class="text-blue-400 mb-2">💡 Tip</div>
+                <p class="text-gray-400 text-sm">You can have multiple <code class="text-red-400">@Config</code> classes — each is discovered and executed at startup. Keep them focused on a single concern (e.g. one for flash, one for storage).</p>
+            </div>
+
+        </div>
+    </section>
+
+    <div class="flex items-center justify-between pt-8 border-t border-zinc-900 text-sm">
+        <a href="/docs/cli" class="text-gray-400 hover:text-white transition-colors">← CLI</a>
+    </div>
+</div>
+
+{% endblock %}

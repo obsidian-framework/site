@@ -1,0 +1,29 @@
+<footer class="max-w-7xl mx-auto px-6 py-8 flex items-center justify-between text-xs text-zinc-700">
+    <span>© 2026 Obsidian Framework — MIT License</span>
+    <div class="flex items-center gap-6">
+        <a href="/docs" class="hover:text-zinc-400 transition-colors">Docs</a>
+        <a href="https://github.com/obsidian-framework" class="hover:text-zinc-400 transition-colors">GitHub</a>
+    </div>
+</footer>
+<script src="/assets/js/prism-langage-bungle.js"></script>
+<script>
+    function switchTab(id) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('border-red-500', 'bg-zinc-950');
+            btn.classList.add('border-transparent');
+            const title = btn.querySelector('p');
+            if (title) title.classList.replace('text-white', 'text-zinc-400');
+        });
+
+        document.getElementById('panel-' + id).classList.remove('hidden');
+        const activeBtn = document.getElementById('tab-' + id);
+        activeBtn.classList.add('border-red-500', 'bg-zinc-950');
+        activeBtn.classList.remove('border-transparent');
+        const activeTitle = activeBtn.querySelector('p');
+        if (activeTitle) activeTitle.classList.replace('text-zinc-400', 'text-white');
+
+        // Re-highlight newly visible code blocks
+        Prism.highlightAll();
+    }
+</script>

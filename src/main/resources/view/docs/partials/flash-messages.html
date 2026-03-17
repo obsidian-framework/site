@@ -1,89 +1,90 @@
-<section id="flash-messages">
-    <h2 class="text-3xl font-bold text-white mb-6">Flash Messages</h2>
+{% extends "view/layout/docs.html" %}
+{% block content %}
 
-    <p class="text-gray-400 mb-6">
-        Display temporary notifications after user actions. No external dependencies required.
-    </p>
+<div class="space-y-16">
 
-    <div class="space-y-6">
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Usage in a controller</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">@Post("/login")
-public Object login(Request req, Response res)
-{
-    String username = req.queryParams("username");
-    String password = req.queryParams("password");
+    <section id="flash-messages">
+        <h2 class="text-3xl font-bold text-white mb-2">Flash Messages</h2>
+        <p class="text-gray-400 mb-8">Display temporary notifications after user actions. No external dependencies required.</p>
 
-    if (login(username, password, req.session())) {
-        return redirectWithFlash(req, res, "success", "Welcome back!", "/dashboard");
+        <div class="space-y-8">
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Usage in a controller</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">@POST("/login")
+public Object login(Request req, Response res) {
+    try {
+        if (Auth.login(req.queryParams("username"), req.queryParams("password"), req)) {
+            return redirectWithFlash(req, res, "success", "Welcome back!", "/dashboard");
+        }
+        return redirectWithFlash(req, res, "error", "Invalid credentials", "/login");
+    } catch (LoginLockedException e) {
+        return redirectWithFlash(req, res, "error", e.getMessage(), "/login");
     }
-
-    return redirectWithFlash(req, res, "error", "Invalid credentials", "/login");
 }</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Available notification types</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">// Success (green/orange)
-redirectWithFlash(req, res, "success", "Operation completed!", "/");
-
-// Error (red)
-redirectWithFlash(req, res, "error", "Something went wrong", "/");
-
-// Info (blue)
-redirectWithFlash(req, res, "info", "Check your email", "/");
-
-// Warning (yellow/orange)
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Available types</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">redirectWithFlash(req, res, "success", "Operation completed!", "/");
+redirectWithFlash(req, res, "error",   "Something went wrong",  "/");
+redirectWithFlash(req, res, "info",    "Check your email",      "/");
 redirectWithFlash(req, res, "warning", "Changes require restart", "/");</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Display in template</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-twig">&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-&lt;body&gt;
-    &lt;nav&gt;...&lt;/nav&gt;
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Display in layout</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Add <code class="text-red-400">&#123;&#123; flash() &#125;&#125;</code> once in your base layout — it renders automatically when a flash message exists.</p>
+                    <pre><code class="language-twig">&lt;body&gt;
+    &#123;% block content %&#125;&#123;% endblock %&#125;
 
-    {{ "{%" }} block content {{ "%}" }}{{ "{%" }} endblock {{ "%}" }}
-
-    {{ "{{" }} flash() {{ "}}" }}
-
-&lt;/body&gt;
-&lt;/html&gt;</code></pre>
+    &#123;&#123; flash() | raw &#125;&#125;
+&lt;/body&gt;</code></pre>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="text-gray-400 text-sm mb-3">Custom configuration (optional)</div>
-            <div class="bg-zinc-950 border border-zinc-800 p-6">
-                <pre class="line-numbers"><code class="language-java">// In Main.java
-public static void configureFlash()
-{
-    // Change duration (in ms)
-    FlashConfig.setDuration(5000);
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Custom configuration</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Use a <code class="text-red-400">@Config</code> class to configure flash notifications at startup. See <a href="/docs/config" class="text-red-400 hover:underline">Config</a>.</p>
+                    <pre><code class="language-java">@Config
+public class NotifConfig implements ConfigInterface {
 
-    // Change position
-    FlashConfig.setPosition("top-right");
-    // Options: top-right, top-left, bottom-right,
-    //          bottom-left, top-center, bottom-center
+    @Override
+    public void configure() {
+        FlashConfig.setDuration(5000);
 
-    // Custom CSS
-    FlashConfig.setCustomCSS("""
-        .flash-notification {
-            border-radius: 1rem;
-            font-size: 0.875rem;
-        }
-        .flash-success {
-            background: linear-gradient(to right, #10b981, #059669);
-        }
+        // Options: top-right, top-left, bottom-right,
+        //          bottom-left, top-center, bottom-center
+        FlashConfig.setPosition("top-right");
+
+        FlashConfig.setCustomCSS("""
+            .flash-notification {
+                border-radius: 1rem;
+                font-size: 0.875rem;
+            }
+            .flash-success {
+                background: linear-gradient(to right, #10b981, #059669);
+            }
         """);
+    }
 }</code></pre>
+                </div>
             </div>
+
         </div>
+    </section>
+
+    <div class="flex items-center justify-between pt-8 border-t border-zinc-900 text-sm">
+        <a href="/docs/csrf" class="text-gray-400 hover:text-white transition-colors">← CSRF</a>
+        <a href="/docs/database" class="text-gray-400 hover:text-white transition-colors">Database →</a>
     </div>
-</section>
+
+</div>
+
+{% endblock %}

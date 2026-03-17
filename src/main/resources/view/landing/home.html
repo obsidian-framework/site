@@ -2,7 +2,6 @@
 {% block content %}
 {% include "./partials/hero.html" %}
 {% include "./partials/getting_started.html" %}
-<!-- Code showcase -->
 <div class=" mx-auto px-6 py-16 border-b border-zinc-900">
     <p class="text-xs text-zinc-600 uppercase tracking-widest mb-8">Code that speaks for itself</p>
     <div class="grid md:grid-cols-2 gap-8">
@@ -60,7 +59,7 @@ private Object dashboard() {
 @CsrfProtect
 @POST("/login")
 private Object login(Request req, Response res) {
-    login(username, password, session);
+    Auth.login(username, password, req);
 }</code></pre>
             </div>
         </div>
@@ -130,7 +129,9 @@ public class Counter extends LiveComponent
     @State
     private int count = 0;
 
+    @Action
     public void increment() { count++; }
+    @Action
     public void decrement() { count--; }
 
     public int getCount() { return count; }
