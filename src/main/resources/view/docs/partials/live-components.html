@@ -17,6 +17,7 @@
                     <div>
                         <div class="text-gray-400 text-sm mb-3">Create a component</div>
                         <div class="bg-zinc-950 border border-zinc-800 p-6">
+                            {% verbatim %}
                             <pre><code class="language-java">@LiveComponentImpl
 public class Counter extends LiveComponent {
 
@@ -36,45 +37,44 @@ public class Counter extends LiveComponent {
         return "components/counter.html";
     }
 }</code></pre>
+                            {% endverbatim %}
                         </div>
                     </div>
 
                     <div>
                         <div class="text-gray-400 text-sm mb-3">Component template</div>
                         <div class="bg-zinc-950 border border-zinc-800 p-6">
-                            <pre><code class="language-html">&lt;div live:id="&#123;&#123; _id &#125;&#125;"&gt;
-    &lt;h2&gt;Count: &#123;&#123; count &#125;&#125;&lt;/h2&gt;
+                            {% verbatim %}
+                            <pre><code class="language-html">&lt;div live:id="{{ _id }}"&gt;
+    &lt;h2&gt;Count: {{ count }}&lt;/h2&gt;
 
     &lt;button live:click="increment"&gt;+ Increment&lt;/button&gt;
     &lt;button live:click="decrement"&gt;- Decrement&lt;/button&gt;
 
     &lt;div live:loading&gt;Updating...&lt;/div&gt;
 &lt;/div&gt;</code></pre>
+                            {% endverbatim %}
                         </div>
                     </div>
 
                     <div>
                         <div class="text-gray-400 text-sm mb-3">Use in a template</div>
                         <div class="bg-zinc-950 border border-zinc-800 p-6">
-                            <pre><code class="language-twig">&#123;&#123; component('Counter') | raw &#125;&#125;
+                            {% verbatim %}
+                            <pre><code class="language-twig">{{ component('Counter') | raw }}
 
-&#123;&#123; component('UserCard', { userId: user.id }) | raw &#125;&#125;</code></pre>
+{{ component('UserCard', { userId: user.id }) | raw }}</code></pre>
+                            {% endverbatim %}
                         </div>
                     </div>
 
                     <div>
-                        <div class="text-gray-400 text-sm mb-3">Setup — include scripts in layout</div>
+                        <div class="text-gray-400 text-sm mb-3">Setup</div>
                         <div class="bg-zinc-950 border border-zinc-800 p-6">
-                            <p class="text-gray-400 text-sm mb-4">Routes that use LiveComponents require <code class="text-red-400">SessionMiddleware</code> and the LiveComponents runtime script in your layout.</p>
-                            <pre><code class="language-java">@Before(SessionMiddleware.class)
-@GET("/dashboard")
-public Object dashboard(Request req, Response res) {
-    return render("dashboard.html", Map.of());
-}</code></pre>
-                            <pre class="mt-4"><code class="language-twig">&lt;body&gt;
-    &#123;% block content %&#125;&#123;% endblock %&#125;
-    &#123;&#123; livecomponents_scripts | raw &#125;&#125;
-&lt;/body&gt;</code></pre>
+                            <p class="text-gray-400 text-sm">
+                                No setup required. The LiveComponents runtime script is injected automatically before <code class="text-red-400">&lt;/body&gt;</code>
+                                and <code class="text-red-400">SessionMiddleware</code> is applied globally to all routes.
+                            </p>
                         </div>
                     </div>
 
@@ -93,6 +93,7 @@ public Object dashboard(Request req, Response res) {
                             <div class="space-y-4">
                                 <div>
                                     <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Component</div>
+                                    {% verbatim %}
                                     <pre><code class="language-java">@LiveComponentImpl
 public class UserCard extends LiveComponent {
 
@@ -112,10 +113,13 @@ public class UserCard extends LiveComponent {
         return "components/user-card.html";
     }
 }</code></pre>
+                                    {% endverbatim %}
                                 </div>
                                 <div class="border-t border-zinc-800 pt-4">
                                     <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Template</div>
-                                    <pre><code class="language-twig">&#123;&#123; component('UserCard', { userId: user.id }) | raw &#125;&#125;</code></pre>
+                                    {% verbatim %}
+                                    <pre><code class="language-twig">{{ component('UserCard', { userId: user.id }) | raw }}</code></pre>
+                                    {% endverbatim %}
                                 </div>
                             </div>
                         </div>
@@ -124,6 +128,7 @@ public class UserCard extends LiveComponent {
                     <div>
                         <div class="text-gray-400 text-sm mb-3">Lifecycle hooks</div>
                         <div class="bg-zinc-950 border border-zinc-800 p-6">
+                            {% verbatim %}
                             <pre><code class="language-java">@Override
 public void onMount() {
     // Called once after props injection, before first render
@@ -135,17 +140,20 @@ public void onUpdate() {
     // Called after every action execution, before re-render
     // Use to recompute derived state
 }</code></pre>
+                            {% endverbatim %}
                         </div>
                     </div>
 
                     <div>
                         <div class="text-gray-400 text-sm mb-3">Request helpers</div>
                         <div class="bg-zinc-950 border border-zinc-800 p-6">
+                            {% verbatim %}
                             <pre><code class="language-java">session("key")              // Read from session
 session("key", value)       // Write to session
 param("name")               // Query/form parameter
 param("name", "default")    // With fallback
 routeParam("id")            // Route parameter (:id)</code></pre>
+                            {% endverbatim %}
                         </div>
                     </div>
 
@@ -161,6 +169,7 @@ routeParam("id")            // Route parameter (:id)</code></pre>
                         <div class="text-gray-400 text-sm mb-3">@Action — explicit action contract</div>
                         <div class="bg-zinc-950 border border-zinc-800 p-6">
                             <p class="text-gray-400 text-sm mb-4">Only methods annotated with <code class="text-red-400">@Action</code> can be invoked from the client. Any unlisted method throws a <code class="text-red-400">ComponentException</code> immediately.</p>
+                            {% verbatim %}
                             <pre><code class="language-java">@Action
 public void save() {
     // Called via live:click="save"
@@ -170,6 +179,7 @@ public void save() {
 public void delete(int id) {
     // Called via live:click="delete({{ id }})"
 }</code></pre>
+                            {% endverbatim %}
                         </div>
                     </div>
 
@@ -177,6 +187,7 @@ public void delete(int id) {
                         <div class="text-gray-400 text-sm mb-3">ComponentResponse — redirect & events</div>
                         <div class="bg-zinc-950 border border-zinc-800 p-6">
                             <p class="text-gray-400 text-sm mb-4">Actions can return a <code class="text-red-400">ComponentResponse</code> to trigger a client-side navigation or dispatch a custom event after re-render.</p>
+                            {% verbatim %}
                             <pre><code class="language-java">@Action
 public ComponentResponse save() {
     // Persist data...
@@ -192,6 +203,7 @@ public ComponentResponse delete() {
 window.addEventListener("toast:show", (e) => {
     console.log(e.detail.message); // "Deleted!"
 });</code></pre>
+                            {% endverbatim %}
                         </div>
                     </div>
 
@@ -209,6 +221,7 @@ window.addEventListener("toast:show", (e) => {
                             <div class="space-y-4">
                                 <div>
                                     <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Component</div>
+                                    {% verbatim %}
                                     <pre><code class="language-java">@LiveComponentImpl
 public class SearchFilter extends LiveComponent {
 
@@ -231,22 +244,25 @@ public class SearchFilter extends LiveComponent {
     @Override
     public String template() { return "components/search.html"; }
 }</code></pre>
+                                    {% endverbatim %}
                                 </div>
                                 <div class="border-t border-zinc-800 pt-4">
                                     <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Template</div>
-                                    <pre><code class="language-html">&lt;div live:id="&#123;&#123; _id &#125;&#125;"&gt;
+                                    {% verbatim %}
+                                    <pre><code class="language-html">&lt;div live:id="{{ _id }}"&gt;
     &lt;input
         live:model="search"
         live:debounce="300"
         type="text"
         placeholder="Search..."
-        value="&#123;&#123; search &#125;&#125;"
+        value="{{ search }}"
     &gt;
-    &lt;div&gt;&#123;&#123; filteredItems.size() &#125;&#125; results&lt;/div&gt;
-    &#123;% for item in filteredItems %&#125;
-        &lt;div&gt;&#123;&#123; item &#125;&#125;&lt;/div&gt;
-    &#123;% endfor %&#125;
+    &lt;div&gt;{{ filteredItems.size() }} results&lt;/div&gt;
+    {% for item in filteredItems %}
+        &lt;div&gt;{{ item }}&lt;/div&gt;
+    {% endfor %}
 &lt;/div&gt;</code></pre>
+                                    {% endverbatim %}
                                 </div>
                             </div>
                         </div>
@@ -258,6 +274,7 @@ public class SearchFilter extends LiveComponent {
                             <div class="space-y-4">
                                 <div>
                                     <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Component</div>
+                                    {% verbatim %}
                                     <pre><code class="language-java">@LiveComponentImpl
 public class Dashboard extends LiveComponent {
 
@@ -279,16 +296,19 @@ public class Dashboard extends LiveComponent {
     @Override
     public String template() { return "components/dashboard.html"; }
 }</code></pre>
+                                    {% endverbatim %}
                                 </div>
                                 <div class="border-t border-zinc-800 pt-4">
                                     <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Template</div>
+                                    {% verbatim %}
                                     <pre><code class="language-html">&lt;div
-    live:id="&#123;&#123; _id &#125;&#125;"
+    live:id="{{ _id }}"
     live:poll.5s="refreshStats"
 &gt;
-    &lt;h2&gt;Active Users: &#123;&#123; activeUsers &#125;&#125;&lt;/h2&gt;
+    &lt;h2&gt;Active Users: {{ activeUsers }}&lt;/h2&gt;
     &lt;div live:loading.class="opacity-100" class="opacity-0"&gt;Updating...&lt;/div&gt;
 &lt;/div&gt;</code></pre>
+                                    {% endverbatim %}
                                 </div>
                             </div>
                         </div>
@@ -298,6 +318,7 @@ public class Dashboard extends LiveComponent {
                         <div class="text-gray-400 text-sm mb-3">Lazy mount</div>
                         <div class="bg-zinc-950 border border-zinc-800 p-6">
                             <p class="text-gray-400 text-sm mb-4">Mount a component after first paint to avoid blocking page render. The <code class="text-red-400">innerHTML</code> is shown as a skeleton during fetch.</p>
+                            {% verbatim %}
                             <pre><code class="language-html">&lt;!-- Plain --&gt;
 &lt;div live:lazy="PlayerSearch"&gt;&lt;/div&gt;
 
@@ -308,6 +329,7 @@ public class Dashboard extends LiveComponent {
 &lt;div live:lazy="PlayerSearch"&gt;
     &lt;div class="animate-pulse h-8 bg-zinc-800 rounded"&gt;&lt;/div&gt;
 &lt;/div&gt;</code></pre>
+                            {% endverbatim %}
                         </div>
                     </div>
 
@@ -348,14 +370,27 @@ public class Dashboard extends LiveComponent {
             </div>
 
             <!-- Breaking changes -->
-            <div class="flex items-start gap-3 bg-yellow-900/20 border border-yellow-700 p-6 rounded">
-                <div class="text-yellow-400 text-xl shrink-0">⚠</div>
-                <div>
-                    <div class="text-yellow-300 font-semibold mb-3">Breaking changes in v1.5.0</div>
-                    <ul class="text-yellow-200 text-sm space-y-2">
-                        <li>• <code class="text-yellow-300">@Action</code> is now <strong>required</strong> on all client-callable methods — add it to <code class="text-yellow-300">prev()</code>, <code class="text-yellow-300">next()</code>, and any action method or they will throw <code class="text-yellow-300">ComponentException</code> at runtime</li>
-                        <li>• <code class="text-yellow-300">live:lazy</code> on inputs (update on Enter key) has been renamed to <code class="text-yellow-300">live:enter</code></li>
-                    </ul>
+            <div class="space-y-4">
+                <div class="flex items-start gap-3 bg-yellow-900/20 border border-yellow-700 p-6 rounded">
+                    <div class="text-yellow-400 text-xl shrink-0">⚠</div>
+                    <div>
+                        <div class="text-yellow-300 font-semibold mb-3">Breaking changes in v1.1.0</div>
+                        <ul class="text-yellow-200 text-sm space-y-2">
+                            <li>• Remove <code class="text-yellow-300">&#123;&#123; livecomponents_scripts | raw &#125;&#125;</code> from all templates — script is now injected automatically before <code class="text-yellow-300">&lt;/body&gt;</code></li>
+                            <li>• Remove <code class="text-yellow-300">@Before(SessionMiddleware.class)</code> from controller methods — middleware is now global</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-3 bg-yellow-900/20 border border-yellow-700 p-6 rounded">
+                    <div class="text-yellow-400 text-xl shrink-0">⚠</div>
+                    <div>
+                        <div class="text-yellow-300 font-semibold mb-3">Breaking changes in v1.5.0</div>
+                        <ul class="text-yellow-200 text-sm space-y-2">
+                            <li>• <code class="text-yellow-300">@Action</code> is now <strong>required</strong> on all client-callable methods — add it to <code class="text-yellow-300">prev()</code>, <code class="text-yellow-300">next()</code>, and any action method or they will throw <code class="text-yellow-300">ComponentException</code> at runtime</li>
+                            <li>• <code class="text-yellow-300">live:lazy</code> on inputs (update on Enter key) has been renamed to <code class="text-yellow-300">live:enter</code></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
