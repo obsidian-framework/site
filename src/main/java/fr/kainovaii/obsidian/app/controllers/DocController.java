@@ -91,8 +91,8 @@ public class DocController extends BaseController
         return render("docs/partials/repositories.html", Map.of());
     }
 
-    @GET(value = "/docs/seeders", name = "doc.seeders")
-    private Object seeders(Request req, Response res)
+    @GET(value = "/docs/seeder", name = "doc.seeder")
+    private Object seeder(Request req, Response res)
     {
         return render("docs/partials/seeders.html", Map.of());
     }
