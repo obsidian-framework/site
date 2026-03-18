@@ -1,0 +1,209 @@
+{% extends "view/layout/docs.html" %}
+{% block content %}
+
+<div class="space-y-16">
+
+    <section id="service-providers">
+        <h2 class="text-3xl font-bold text-white mb-2">Service Providers</h2>
+        <p class="text-gray-400 mb-8">Service providers are the central place to configure and register services into the DI container at application boot. Use them when you need setup logic — reading environment variables, opening connections, or binding interfaces to implementations.</p>
+
+        <div class="space-y-8">
+
+            <!-- Creating a provider -->
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Creating a provider</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-6">Extend <code class="text-red-400">ServiceProvider</code> and implement the <code class="text-red-400">register()</code> method.</p>
+                    <pre><code class="language-java">public class AppServiceProvider extends ServiceProvider
+{
+    @Override
+    public void register() {
+        // bind, singleton, or any setup logic here
+    }
+}</code></pre>
+                </div>
+            </div>
+
+            <!-- Registering the provider -->
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Registering your provider</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-6">Declare your providers in the <code class="text-red-400">.env</code> file as a comma-separated list of fully qualified class names. They are loaded once at boot, in order.</p>
+                    <pre><code class="language-bash">PROVIDERS=com.myapp.providers.AppServiceProvider</code></pre>
+                </div>
+            </div>
+
+            <!-- bind() -->
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Binding an interface to an implementation</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-6">Use <code class="text-red-400">bind()</code> to tell the container which concrete class to use when a given interface is requested. Useful for swapping implementations between environments.</p>
+
+                    <div class="space-y-6">
+                        <div>
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Example — AppServiceProvider.java</div>
+                            <pre><code class="language-java">public class AppServiceProvider extends ServiceProvider
+{
+    @Override
+    public void register() {
+        if (env("APP_ENV", "production").equals("testing")) {
+            bind(MailService.class, FakeMailService.class);
+        } else {
+            bind(MailService.class, SmtpMailService.class);
+        }
+    }
+}</code></pre>
+                        </div>
+
+                        <div class="border-t border-zinc-800 pt-6">
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Inject by interface anywhere</div>
+                            <pre><code class="language-java">@Controller
+public class AuthController extends BaseController
+{
+    @Inject
+    private MailService mail;
+
+    @POST("/register")
+    private Object register(Request req, Response res) {
+        // resolves SmtpMailService or FakeMailService
+        // depending on APP_ENV
+        mail.send(req.queryParams("email"), "Welcome!");
+        res.redirect("/dashboard");
+        return null;
+    }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- singleton() -->
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Registering a singleton</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-6">Use <code class="text-red-400">singleton()</code> when your service requires constructor arguments that come from environment variables — something <code class="text-red-400">@Service</code> alone cannot handle since it relies on auto-scanning with no-arg or injectable constructors.</p>
+
+                    <p class="text-gray-500 text-xs mb-6">The following example is illustrative. Apply this pattern to any third-party client or service that needs configuration at boot — payment gateways, mailers, SMS providers, etc.</p>
+
+                    <div class="space-y-6">
+                        <div>
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">AppServiceProvider.java</div>
+                            <pre><code class="language-java">public class AppServiceProvider extends ServiceProvider
+{
+    @Override
+    public void register() {
+        // PaymentGateway needs an API key at construction time.
+        // We instantiate it manually and hand it to the container.
+        singleton(PaymentGateway.class,
+            new PaymentGateway(env("STRIPE_SECRET_KEY", "")));
+    }
+}</code></pre>
+                        </div>
+
+                        <div class="border-t border-zinc-800 pt-6">
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">PaymentGateway.java</div>
+                            <pre><code class="language-java">public class PaymentGateway
+{
+    private final String apiKey;
+
+    public PaymentGateway(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    public boolean charge(String customerId, int amount) {
+        // call Stripe or any payment provider
+        return true;
+    }
+}</code></pre>
+                        </div>
+
+                        <div class="border-t border-zinc-800 pt-6">
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Inject into any controller or service</div>
+                            <pre><code class="language-java">@Controller
+public class CheckoutController extends BaseController
+{
+    @Inject
+    private PaymentGateway payments;
+
+    @POST("/checkout")
+    private Object charge(Request req, Response res) {
+        boolean ok = payments.charge(
+            req.queryParams("customer_id"),
+            Integer.parseInt(req.queryParams("amount"))
+        );
+        return render("checkout/result.html", Map.of("success", ok));
+    }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- @Service vs ServiceProvider -->
+            <div>
+                <div class="text-gray-400 text-sm mb-3">@Service vs ServiceProvider</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-6">Both are entry points into the DI container — but they serve different purposes.</p>
+
+                    <div class="space-y-6">
+                        <div>
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">@Service — no configuration needed</div>
+                            <pre><code class="language-java">// Automatically discovered and registered at boot.
+// Use when the class has no external setup.
+@Service
+public class SsoService
+{
+    public boolean validate(String token) {
+        // validate JWT or external SSO token
+    }
+}</code></pre>
+                        </div>
+
+                        <div class="border-t border-zinc-800 pt-6">
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">ServiceProvider — setup logic required</div>
+                            <pre><code class="language-java">// Use when you need env variables, constructor arguments,
+// interface bindings, or any logic before registration.
+public class AppServiceProvider extends ServiceProvider
+{
+    @Override
+    public void register() {
+        singleton(PaymentGateway.class,
+            new PaymentGateway(env("STRIPE_SECRET_KEY", "")));
+
+        bind(MailService.class, SmtpMailService.class);
+    }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Boot order -->
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Boot order</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-6">Service providers run after the DI container has been populated. This means you can safely override or extend bindings that were auto-discovered by <code class="text-red-400">@Service</code> and <code class="text-red-400">@Repository</code>.</p>
+                    <pre><code class="language-text">1. @Repository and @Service classes are scanned and registered
+2. ServiceProvider.register() is called          ← your providers run here
+3. Web server starts
+4. First request is handled</code></pre>
+                </div>
+            </div>
+
+            <!-- Tip -->
+            <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
+                <div class="text-blue-400 mb-2">💡 Tip</div>
+                <p class="text-gray-400 text-sm">If a provider throws, the application will not start. This ensures that misconfigured services — wrong API keys, unreachable hosts — are caught immediately at boot rather than silently failing at runtime.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <div class="flex items-center justify-between pt-8 border-t border-zinc-900 text-sm">
+        <a href="/docs/repositories" class="text-gray-400 hover:text-white transition-colors">← Repositories</a>
+        <a href="/docs/seeder" class="text-gray-400 hover:text-white transition-colors">Seeders →</a>
+    </div>
+
+</div>
+
+{% endblock %}

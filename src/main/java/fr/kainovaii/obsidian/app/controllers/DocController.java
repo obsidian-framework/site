@@ -156,4 +156,10 @@ public class DocController extends BaseController
     {
         return render("docs/partials/realtime-comparison.html", Map.of());
     }
+
+    @GET(value = "/docs/services", name = "doc.services")
+    private Object services(Request req, Response res)
+    {
+        return render("docs/partials/services.html", Map.of());
+    }
 }

@@ -56,8 +56,9 @@ public class Counter extends LiveComponent {
                     <div>
                         <div class="text-gray-400 text-sm mb-3">Use in a template</div>
                         <div class="bg-zinc-950 border border-zinc-800 p-6">
-                            <pre><code class="language-twig">&#123;% component 'Counter' %&#125;</code></pre>
-                            <p class="text-gray-500 text-xs mt-3">The <code class="text-red-400">&#123;% component %&#125;</code> tag replaces the old <code class="text-red-400">&#123;&#123; component('X') | raw &#125;&#125;</code> — no more forgotten <code class="text-red-400">| raw</code>.</p>
+                            <pre><code class="language-twig">&#123;&#123; component('Counter') | raw &#125;&#125;
+
+&#123;&#123; component('UserCard', { userId: user.id }) | raw &#125;&#125;</code></pre>
                         </div>
                     </div>
 
@@ -114,7 +115,7 @@ public class UserCard extends LiveComponent {
                                 </div>
                                 <div class="border-t border-zinc-800 pt-4">
                                     <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Template</div>
-                                    <pre><code class="language-twig">&#123;% component 'UserCard' with { userId: user.id } %&#125;</code></pre>
+                                    <pre><code class="language-twig">&#123;&#123; component('UserCard', { userId: user.id }) | raw &#125;&#125;</code></pre>
                                 </div>
                             </div>
                         </div>
@@ -354,7 +355,6 @@ public class Dashboard extends LiveComponent {
                     <ul class="text-yellow-200 text-sm space-y-2">
                         <li>• <code class="text-yellow-300">@Action</code> is now <strong>required</strong> on all client-callable methods — add it to <code class="text-yellow-300">prev()</code>, <code class="text-yellow-300">next()</code>, and any action method or they will throw <code class="text-yellow-300">ComponentException</code> at runtime</li>
                         <li>• <code class="text-yellow-300">live:lazy</code> on inputs (update on Enter key) has been renamed to <code class="text-yellow-300">live:enter</code></li>
-                        <li>• <code class="text-yellow-300">&#123;&#123; component('X') | raw &#125;&#125;</code> still works but is deprecated — migrate to <code class="text-yellow-300">&#123;% component 'X' %&#125;</code></li>
                     </ul>
                 </div>
             </div>
