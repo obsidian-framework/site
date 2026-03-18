@@ -14,25 +14,20 @@
 <div class="min-h-screen px-6 py-12">
     <div class="max-w-7xl mx-auto">
         <div class="grid lg:grid-cols-4 gap-12">
-
             <div class="lg:col-span-1">
                 <nav class="sidebar space-y-6">
-
-                    <!-- Getting Started -->
                     <div>
                         <div class="text-xs font-semibold uppercase tracking-widest text-zinc-600 px-3 mb-2">Getting Started</div>
                         <div class="space-y-0.5">
                             <a href="/docs/installation" class="block px-3 py-2 text-gray-400 hover:text-white hover:bg-zinc-900 rounded transition-colors text-sm">Installation</a>
                         </div>
                     </div>
-
-                    <!-- The Basics -->
                     <div>
                         <div class="text-xs font-semibold uppercase tracking-widest text-zinc-600 px-3 mb-2">The Basics</div>
                         <div class="space-y-0.5">
                             <a href="/docs/routing" class="block px-3 py-2 text-gray-400 hover:text-white hover:bg-zinc-900 rounded transition-colors text-sm">Routing</a>
                             <a href="/docs/controllers" class="block px-3 py-2 text-gray-400 hover:text-white hover:bg-zinc-900 rounded transition-colors text-sm">Controllers</a>
-                            <a href="/docs/middleware" class="block px-3 py-2 text-gray-400 hover:text-white hover:bg-zinc-900 rounded transition-colors text-sm">Middleware</a>
+                            <a href="/docs/middlewares" class="block px-3 py-2 text-gray-400 hover:text-white hover:bg-zinc-900 rounded transition-colors text-sm">Middleware</a>
                             <a href="/docs/templates" class="block px-3 py-2 text-gray-400 hover:text-white hover:bg-zinc-900 rounded transition-colors text-sm">Templates</a>
                             <a href="/docs/validation" class="block px-3 py-2 text-gray-400 hover:text-white hover:bg-zinc-900 rounded transition-colors text-sm">Validation</a>
                             <a href="/docs/csrf" class="block px-3 py-2 text-gray-400 hover:text-white hover:bg-zinc-900 rounded transition-colors text-sm">CSRF</a>
@@ -40,8 +35,6 @@
                             <a href="/docs/config" class="block px-3 py-2 text-gray-400 hover:text-white hover:bg-zinc-900 rounded transition-colors text-sm">Config</a>
                         </div>
                     </div>
-
-                    <!-- Database -->
                     <div>
                         <div class="text-xs font-semibold uppercase tracking-widest text-zinc-600 px-3 mb-2">Database</div>
                         <div class="space-y-0.5">
@@ -52,16 +45,12 @@
                             <a href="/docs/seeder" class="block px-3 py-2 text-gray-400 hover:text-white hover:bg-zinc-900 rounded transition-colors text-sm">Seeder</a>
                         </div>
                     </div>
-
-                    <!-- Security -->
                     <div>
                         <div class="text-xs font-semibold uppercase tracking-widest text-zinc-600 px-3 mb-2">Security</div>
                         <div class="space-y-0.5">
                             <a href="/docs/security" class="block px-3 py-2 text-gray-400 hover:text-white hover:bg-zinc-900 rounded transition-colors text-sm">Authentication</a>
                         </div>
                     </div>
-
-                    <!-- Real-time -->
                     <div>
                         <div class="text-xs font-semibold uppercase tracking-widest text-zinc-600 px-3 mb-2">Real-time</div>
                         <div class="space-y-0.5">
@@ -72,8 +61,6 @@
                             <a href="/docs/flow" class="block px-3 py-2 text-gray-400 hover:text-white hover:bg-zinc-900 rounded transition-colors text-sm">Flow</a>
                         </div>
                     </div>
-
-                    <!-- Services -->
                     <div>
                         <div class="text-xs font-semibold uppercase tracking-widest text-zinc-600 px-3 mb-2">Services</div>
                         <div class="space-y-0.5">
@@ -81,18 +68,14 @@
                             <a href="/docs/storage" class="block px-3 py-2 text-gray-400 hover:text-white hover:bg-zinc-900 rounded transition-colors text-sm">Storage</a>
                         </div>
                     </div>
-
-                    <!-- Reference -->
                     <div>
                         <div class="text-xs font-semibold uppercase tracking-widest text-zinc-600 px-3 mb-2">Reference</div>
                         <div class="space-y-0.5">
                             <a href="/docs/cli" class="block px-3 py-2 text-gray-400 hover:text-white hover:bg-zinc-900 rounded transition-colors text-sm">CLI</a>
                         </div>
                     </div>
-
                 </nav>
             </div>
-
             <div class="lg:col-span-3 space-y-16">
                 {% block content %}{% endblock %}
             </div>
