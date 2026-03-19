@@ -24,30 +24,32 @@
             </div>
 
             <div>
-                <div class="text-gray-400 text-sm mb-3">2. Configure your database</div>
-                <div class="bg-zinc-950 border border-zinc-800 p-6">
-                    <p class="text-gray-400 text-sm mb-4">Create a <code class="text-red-400">.env</code> file at the project root and fill in your database credentials. See the <a href="/docs/database" class="text-red-400 hover:underline">Database</a> section for all available options.</p>
-                </div>
-            </div>
-
-            <div>
-                <div class="text-gray-400 text-sm mb-3">3. Run the application</div>
+                <div class="text-gray-400 text-sm mb-3">2. Add the dependency</div>
                 <div class="bg-zinc-950 border border-zinc-800 p-6 space-y-6">
+                    <p class="text-gray-400 text-sm mb-4">Add the JitPack repository and the Obsidian core dependency to your <code class="text-red-400">pom.xml</code>:</p>
                     <div>
-                        <div class="text-green-400 text-xs font-semibold uppercase tracking-widest mb-2">Development</div>
-                        <pre><code class="language-bash">mvn compile exec:java</code></pre>
-                        <p class="text-gray-500 text-xs mt-2">Compiles and starts the server in one step.</p>
+                        <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Repository</div>
+                        <pre><code class="language-xml">&lt;repositories&gt;
+    &lt;repository&gt;
+        &lt;id&gt;jitpack.io&lt;/id&gt;
+        &lt;url&gt;https://jitpack.io&lt;/url&gt;
+    &lt;/repository&gt;
+&lt;/repositories&gt;</code></pre>
                     </div>
                     <div class="border-t border-zinc-800 pt-6">
-                        <div class="text-blue-400 text-xs font-semibold uppercase tracking-widest mb-2">Production</div>
-                        <pre><code class="language-bash">mvn clean package
-java -jar target/app.jar</code></pre>
+                        <div class="text-red-400 text-xs uppercase tracking-widest mb-2">Dependency</div>
+                        <pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;com.github.obsidian-framework&lt;/groupId&gt;
+    &lt;artifactId&gt;core&lt;/artifactId&gt;
+    &lt;version&gt;latest&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
                     </div>
+                    <p class="text-gray-600 text-xs mt-2">The skeleton already includes this — you only need to add it manually if you're starting from an empty project.</p>
                 </div>
             </div>
 
             <div>
-                <div class="text-gray-400 text-sm mb-3">4. Configure exec-maven-plugin</div>
+                <div class="text-gray-400 text-sm mb-3">3. Configure exec-maven-plugin</div>
                 <div class="bg-zinc-950 border border-zinc-800 p-6">
                     <p class="text-gray-400 text-sm mb-4">Make sure your <code class="text-red-400">pom.xml</code> points to your <code class="text-red-400">Main</code> class:</p>
                     <pre><code class="language-xml">&lt;plugin&gt;
@@ -59,6 +61,29 @@ java -jar target/app.jar</code></pre>
     &lt;/configuration&gt;
 &lt;/plugin&gt;</code></pre>
                     <p class="text-gray-500 text-xs mt-3">The skeleton already includes this — just update the <code class="text-red-400">mainClass</code> to match your package.</p>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">4. Configure your database</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Create a <code class="text-red-400">.env</code> file at the project root and fill in your database credentials. See the <a href="/docs/database" class="text-red-400 hover:underline">Database</a> section for all available options.</p>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">5. Run the application</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6 space-y-6">
+                    <div>
+                        <div class="text-green-400 text-xs font-semibold uppercase tracking-widest mb-2">Development</div>
+                        <pre><code class="language-bash">mvn clean package exec:java</code></pre>
+                        <p class="text-gray-500 text-xs mt-2">Compiles and starts the server in one step.</p>
+                    </div>
+                    <div class="border-t border-zinc-800 pt-6">
+                        <div class="text-blue-400 text-xs font-semibold uppercase tracking-widest mb-2">Production</div>
+                        <pre><code class="language-bash">mvn clean package
+java -jar target/app.jar</code></pre>
+                    </div>
                 </div>
             </div>
 

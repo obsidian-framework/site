@@ -57,7 +57,6 @@
 
     &#123;&#123; flash() | raw &#125;&#125;
     &#123;&#123; flow_scripts | raw &#125;&#125;
-    &#123;&#123; livecomponents_scripts | raw &#125;&#125;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
                 </div>
@@ -109,15 +108,8 @@
                         </div>
 
                         <div class="border-t border-zinc-800 pt-6">
-                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">LiveComponents</div>
-                            <pre><code class="language-twig">&#123;&#123; component('Counter') | raw &#125;&#125;</code></pre>
-                            <p class="text-gray-500 text-xs mt-2">Renders a LiveComponent by class name. See <a href="/docs/live-components" class="text-red-400 hover:underline">LiveComponents</a>.</p>
-                        </div>
-
-                        <div class="border-t border-zinc-800 pt-6">
                             <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Scripts</div>
-                            <pre><code class="language-twig">&#123;&#123; flow_scripts | raw &#125;&#125;           &lt;!-- Client-side navigation --&gt;
-&#123;&#123; livecomponents_scripts | raw &#125;&#125;  &lt;!-- LiveComponents runtime --&gt;</code></pre>
+                            <pre><code class="language-twig">&#123;&#123; flow_scripts | raw &#125;&#125;           &lt;!-- Client-side navigation --&gt;</code></pre>
                             <p class="text-gray-500 text-xs mt-2">Include these at the bottom of your base layout. The <code class="text-red-400">| raw</code> filter is required — without it Pebble escapes the script tags.</p>
                         </div>
 

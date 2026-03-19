@@ -8,158 +8,156 @@ import spark.Response;
 
 import java.util.Map;
 
-@Controller
+@Controller("/docs")
 public class DocController extends BaseController
 {
-    @GET(value = "/docs", name = "doc.installation")
+    @GET(value = "", name = "doc.installation")
     private Object index(Response res)
     {
-        res.redirect("/docs/installation");
+        res.redirect("/installation");
         return true;
     }
 
-
-    @GET(value = "/docs/installation", name = "doc.installation")
+    @GET(value = "/installation", name = "doc.installation")
     private Object installation(Request req, Response res)
     {
-        return render("docs/partials/installation.html", Map.of());
+        return render("docs/partials/installation.html", null);
     }
 
-    @GET(value = "/docs/routing", name = "doc.routing")
+    @GET(value = "/routing", name = "doc.routing")
     private Object routing(Request req, Response res)
     {
-        return render("docs/partials/routing.html", Map.of());
+        return render("docs/partials/routing.html", null);
     }
 
-    @GET(value = "/docs/controllers", name = "doc.controllers")
+    @GET(value = "/controllers", name = "doc.controllers")
     private Object controllers(Request req, Response res)
     {
-        return render("docs/partials/controllers.html", Map.of());
+        return render("docs/partials/controllers.html", null);
     }
 
-    @GET(value = "/docs/middlewares", name = "doc.middlewares")
+    @GET(value = "/middlewares", name = "doc.middlewares")
     private Object middlewares(Request req, Response res)
     {
-        return render("docs/partials/middlewares.html", Map.of());
+        return render("docs/partials/middlewares.html", null);
     }
 
-    @GET(value = "/docs/templates", name = "doc.template")
+    @GET(value = "/templates", name = "doc.template")
     private Object template(Request req, Response res)
     {
-        return render("docs/partials/template.html", Map.of());
+        return render("docs/partials/template.html", null);
     }
 
-    @GET(value = "/docs/validation", name = "doc.validation")
+    @GET(value = "/validation", name = "doc.validation")
     private Object validation(Request req, Response res)
     {
-        return render("docs/partials/validation.html", Map.of());
+        return render("docs/partials/validation.html", null);
     }
 
-    @GET(value = "/docs/csrf", name = "doc.csrf")
+    @GET(value = "/csrf", name = "doc.csrf")
     private Object csrf(Request req, Response res)
     {
-        return render("docs/partials/csrf.html", Map.of());
+        return render("docs/partials/csrf.html", null);
     }
 
-    @GET(value = "/docs/flash-messages", name = "doc.flash-messages")
-    private Object flashMessage(Request req, Response res)
-    {
-        return render("docs/partials/flash-messages.html", Map.of());
+    @GET(value = "/flash-messages", name = "doc.flash-messages")
+    private Object flashMessage(Request req, Response res) {
+        return render("docs/partials/flash-messages.html", null);
     }
 
-    @GET(value = "/docs/database", name = "doc.database")
+    @GET(value = "/database", name = "doc.database")
     private Object database(Request req, Response res)
     {
-        return render("docs/partials/database.html", Map.of());
+        return render("docs/partials/database.html", null);
     }
 
-    @GET(value = "/docs/models", name = "doc.models")
+    @GET(value = "/models", name = "doc.models")
     private Object models(Request req, Response res)
     {
-        return render("docs/partials/models.html", Map.of());
+        return render("docs/partials/models.html", null);
     }
 
-    @GET(value = "/docs/migrations", name = "doc.migrations")
+    @GET(value = "/migrations", name = "doc.migrations")
     private Object migrations(Request req, Response res)
     {
-        return render("docs/partials/migrations.html", Map.of());
+        return render("docs/partials/migrations.html", null);
     }
 
-    @GET(value = "/docs/repositories", name = "doc.repositories")
+    @GET(value = "/repositories", name = "doc.repositories")
     private Object repositories(Request req, Response res)
     {
-        return render("docs/partials/repositories.html", Map.of());
+        return render("docs/partials/repositories.html", null);
     }
 
-    @GET(value = "/docs/seeder", name = "doc.seeder")
+    @GET(value = "/seeder", name = "doc.seeder")
     private Object seeder(Request req, Response res)
     {
-        return render("docs/partials/seeders.html", Map.of());
+        return render("docs/partials/seeders.html", null);
     }
 
-    @GET(value = "/docs/security", name = "doc.security")
+    @GET(value = "/security", name = "doc.security")
     private Object security(Request req, Response res)
     {
-        return render("docs/partials/security.html", Map.of());
+        return render("docs/partials/security.html", null);
     }
 
-    @GET(value = "/docs/cache", name = "doc.cache")
+    @GET(value = "/cache", name = "doc.cache")
     private Object cache(Request req, Response res)
     {
-        return render("docs/partials/cache.html", Map.of());
+        return render("docs/partials/cache.html", null);
     }
 
-    @GET(value = "/docs/storage", name = "doc.storage")
+    @GET(value = "/storage", name = "doc.storage")
     private Object storage(Request req, Response res)
     {
-        return render("docs/partials/storage.html", Map.of());
+        return render("docs/partials/storage.html", null);
     }
 
-    @GET(value = "/docs/websockets", name = "doc.websockets")
+    @GET(value = "/websockets", name = "doc.websockets")
     private Object websockets(Request req, Response res)
     {
-        return render("docs/partials/websockets.html", Map.of());
+        return render("docs/partials/websockets.html", null);
     }
 
-    @GET(value = "/docs/sse", name = "doc.sse")
+    @GET(value = "/sse", name = "doc.sse")
     private Object sse(Request req, Response res)
     {
-        return render("docs/partials/sse.html", Map.of());
+        return render("docs/partials/sse.html", null);
     }
 
-    @GET(value = "/docs/live-components", name = "doc.live-components")
+    @GET(value = "/live-components", name = "doc.live-components")
     private Object liveComponents(Request req, Response res)
     {
-        return render("docs/partials/live-components.html", Map.of());
+        return render("docs/partials/live-components.html", null);
     }
 
-    @GET(value = "/docs/flow", name = "doc.flow")
+    @GET(value = "/flow", name = "doc.flow")
     private Object flow(Request req, Response res)
     {
-        return render("docs/partials/flow.html", Map.of());
+        return render("docs/partials/flow.html", null);
     }
 
-    @GET(value = "/docs/cli", name = "doc.cli")
+    @GET(value = "/cli", name = "doc.cli")
     private Object cli(Request req, Response res)
     {
-        return render("docs/partials/cli.html", Map.of());
+        return render("docs/partials/cli.html", null);
     }
 
-    @GET(value = "/docs/config", name = "doc.config")
+    @GET(value = "/config", name = "doc.config")
     private Object config(Request req, Response res)
     {
-        return render("docs/partials/config.html", Map.of());
+        return render("docs/partials/config.html", null);
     }
 
-    @GET(value = "/docs/realtime", name = "doc.realtime")
+    @GET(value = "/realtime", name = "doc.realtime")
     private Object realtime(Request req, Response res)
     {
-        return render("docs/partials/realtime-comparison.html", Map.of());
+        return render("docs/partials/realtime-comparison.html", null);
     }
 
-    @GET(value = "/docs/services", name = "doc.services")
+    @GET(value = "/services", name = "doc.services")
     private Object services(Request req, Response res)
     {
-        return render("docs/partials/services.html", Map.of());
+        return render("docs/partials/services.html", null);
     }
 }
