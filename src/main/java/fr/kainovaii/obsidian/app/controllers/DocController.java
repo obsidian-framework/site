@@ -14,7 +14,7 @@ public class DocController extends BaseController
     @GET(value = "", name = "doc.installation")
     private Object index(Response res)
     {
-        res.redirect("/installation");
+        res.redirect("/docs/installation");
         return true;
     }
 
@@ -149,7 +149,7 @@ public class DocController extends BaseController
         return render("docs/partials/config.html", null);
     }
 
-    @GET(value = "/realtime", name = "doc.realtime")
+    @GET(value = "/realtime-comparison", name = "doc.realtime")
     private Object realtime(Request req, Response res)
     {
         return render("docs/partials/realtime-comparison.html", null);
@@ -159,5 +159,17 @@ public class DocController extends BaseController
     private Object services(Request req, Response res)
     {
         return render("docs/partials/services.html", null);
+    }
+
+    @GET(value = "/relations", name = "doc.relations")
+    private Object relations(Request req, Response res)
+    {
+        return render("docs/partials/relations.html", null);
+    }
+
+    @GET(value = "/observers", name = "doc.observers")
+    private Object observers(Request req, Response res)
+    {
+        return render("docs/partials/observers.html", null);
     }
 }

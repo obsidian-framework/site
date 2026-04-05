@@ -1,98 +1,86 @@
-<div live:id="{{ _id }}" class="max-w-3xl mx-auto bg-zinc-900 rounded-lg border border-zinc-800 p-6" xmlns:live="http://www.w3.org/1999/xhtml">
-    <!-- Control buttons -->
-    <div class="bg-zinc-900 rounded-lg border border-zinc-800 p-6 mb-6">
-        <h2 class="text-xl font-bold text-white mb-4">Notification System</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <button 
-                live:click="addSuccess" 
-                class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition"
-            >
-                ✓ Success
-            </button>
-            <button 
-                live:click="addError" 
-                class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition"
-            >
-                ✗ Error
-            </button>
-            <button 
-                live:click="addWarning" 
-                class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded transition"
-            >
-                ⚠ Warning
-            </button>
-            <button 
-                live:click="addInfo" 
-                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition"
-            >
-                ℹ Info
-            </button>
-        </div>
-        
-        {% if count > 0 %}
-        <div class="mt-4 pt-4 border-t border-zinc-800 flex justify-between items-center">
-            <span class="text-gray-400 text-sm">{{ count }} notification{% if count != 1 %}s{% endif %}</span>
-            <button 
-                live:click="dismissAll" 
-                class="text-sm text-red-400 hover:text-red-300 transition"
-            >
-                Dismiss all
-            </button>
-        </div>
-        {% endif %}
+<div live:id="{{ _id }}" class="bg-zinc-950 border border-zinc-800 p-6 mb-4" xmlns:live="http://www.w3.org/1999/xhtml">
+    <p class="text-xs text-zinc-600 uppercase tracking-widest mb-6">Notification System</p>
+    
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-px bg-zinc-800">
+        <button 
+            live:click="addSuccess" 
+            class="bg-black px-4 py-4 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors text-xs font-bold uppercase tracking-widest"
+        >
+            <span class="text-green-500 mr-1">●</span> Success
+        </button>
+        <button 
+            live:click="addError" 
+            class="bg-black px-4 py-4 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors text-xs font-bold uppercase tracking-widest"
+        >
+            <span class="text-red-500 mr-1">●</span> Error
+        </button>
+        <button 
+            live:click="addWarning" 
+            class="bg-black px-4 py-4 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors text-xs font-bold uppercase tracking-widest"
+        >
+            <span class="text-yellow-500 mr-1">●</span> Warning
+        </button>
+        <button 
+            live:click="addInfo" 
+            class="bg-black px-4 py-4 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors text-xs font-bold uppercase tracking-widest"
+        >
+            <span class="text-blue-500 mr-1">●</span> Info
+        </button>
     </div>
     
-    <!-- Notifications container -->
-    <div class="fixed top-4 right-4 space-y-3 z-50 max-w-sm">
+    {% if count > 0 %}
+    <div class="mt-4 flex justify-between items-center border-t border-zinc-800 pt-4">
+        <span class="text-zinc-600 text-xs">{{ count }} notification{% if count != 1 %}s{% endif %}</span>
+        <button
+            live:click="dismissAll"
+            class="text-xs text-red-500 hover:text-red-400 transition-colors uppercase tracking-widest"
+        >
+            Dismiss all
+        </button>
+    </div>
+    {% endif %}
+    
+    <!-- Notifications toast container -->
+    <div class="fixed top-4 right-4 space-y-2 z-50 max-w-sm">
         {% for notif in notifications %}
-        <div class="
-            bg-zinc-900 border rounded-lg shadow-lg p-4 
-            {% if notif.type == 'success' %}border-green-500{% endif %}
-            {% if notif.type == 'error' %}border-red-500{% endif %}
-            {% if notif.type == 'warning' %}border-yellow-500{% endif %}
-            {% if notif.type == 'info' %}border-blue-500{% endif %}
-        ">
+        <div class="bg-black border 
+            {% if notif.type == 'success' %}border-green-500/30{% endif %}
+            {% if notif.type == 'error' %}border-red-500/30{% endif %}
+            {% if notif.type == 'warning' %}border-yellow-500/30{% endif %}
+            {% if notif.type == 'info' %}border-blue-500/30{% endif %}
+            p-4 shadow-2xl"
+        >
             <div class="flex items-start gap-3">
-                <div class="
-                    flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center
-                    {% if notif.type == 'success' %}bg-green-900/30 text-green-400{% endif %}
-                    {% if notif.type == 'error' %}bg-red-900/30 text-red-400{% endif %}
-                    {% if notif.type == 'warning' %}bg-yellow-900/30 text-yellow-400{% endif %}
-                    {% if notif.type == 'info' %}bg-blue-900/30 text-blue-400{% endif %}
-                ">
-                    {% if notif.type == 'success' %}✓{% endif %}
-                    {% if notif.type == 'error' %}✗{% endif %}
-                    {% if notif.type == 'warning' %}⚠{% endif %}
-                    {% if notif.type == 'info' %}ℹ{% endif %}
-                </div>
+                <div class="flex-shrink-0 mt-0.5
+                    {% if notif.type == 'success' %}text-green-500{% endif %}
+                    {% if notif.type == 'error' %}text-red-500{% endif %}
+                    {% if notif.type == 'warning' %}text-yellow-500{% endif %}
+                    {% if notif.type == 'info' %}text-blue-500{% endif %}
+                    text-xs animate-pulse-dot"
+                >●</div>
                 
                 <div class="flex-1 min-w-0">
-                    <div class="
-                        font-semibold
-                        {% if notif.type == 'success' %}text-green-400{% endif %}
-                        {% if notif.type == 'error' %}text-red-400{% endif %}
-                        {% if notif.type == 'warning' %}text-yellow-400{% endif %}
-                        {% if notif.type == 'info' %}text-blue-400{% endif %}
-                    ">
-                        {{ notif.title }}
-                    </div>
-                    <div class="text-gray-300 text-sm mt-1">{{ notif.message }}</div>
+                    <div class="text-white text-sm font-bold">{{ notif.title }}</div>
+                    <div class="text-zinc-500 text-xs mt-1">{{ notif.message }}</div>
                 </div>
                 
                 <button 
                     live:click="dismiss({{ notif.id }})"
-                    class="flex-shrink-0 text-gray-400 hover:text-white transition"
+                    class="flex-shrink-0 text-zinc-700 hover:text-white transition-colors text-xs"
                 >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
+                    ✕
                 </button>
             </div>
         </div>
         {% endfor %}
     </div>
-    
-    <div live:loading style="display: none;" class="text-center text-blue-400 text-sm mt-4">
-        Processing...
+
+    <!--
+    <div live:loading style="display: none;" class="mt-4 text-center">
+        <div class="inline-flex items-center gap-2 text-zinc-600">
+            <span class="text-red-500 animate-pulse-dot text-xs">●</span>
+            <span class="text-xs uppercase tracking-widest">Updating...</span>
+        </div>
     </div>
+    -->
 </div>

@@ -1,14 +1,10 @@
 {% extends "view/layout/docs.html" %}
 {% block content %}
-
 <div class="space-y-16">
-
     <section id="installation">
         <h2 class="text-3xl font-bold text-white mb-2">Installation</h2>
         <p class="text-gray-400 mb-8">Get your first Obsidian app running in minutes.</p>
-
         <div class="space-y-8">
-
             <div class="text-gray-400 text-sm mb-3">1. Clone the skeleton</div>
             <div class="bg-zinc-950 border border-zinc-800 p-6 space-y-6">
                 <div>
@@ -22,28 +18,15 @@
                     <p class="text-gray-600 text-xs mt-2">Includes login, register pages and dashboard out of the box.</p>
                 </div>
             </div>
-
             <div>
                 <div class="text-gray-400 text-sm mb-3">2. Add the dependency</div>
                 <div class="bg-zinc-950 border border-zinc-800 p-6 space-y-6">
-                    <p class="text-gray-400 text-sm mb-4">Add the JitPack repository and the Obsidian core dependency to your <code class="text-red-400">pom.xml</code>:</p>
-                    <div>
-                        <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">Repository</div>
-                        <pre><code class="language-xml">&lt;repositories&gt;
-    &lt;repository&gt;
-        &lt;id&gt;jitpack.io&lt;/id&gt;
-        &lt;url&gt;https://jitpack.io&lt;/url&gt;
-    &lt;/repository&gt;
-&lt;/repositories&gt;</code></pre>
-                    </div>
-                    <div class="border-t border-zinc-800 pt-6">
-                        <div class="text-red-400 text-xs uppercase tracking-widest mb-2">Dependency</div>
-                        <pre><code class="language-xml">&lt;dependency&gt;
-    &lt;groupId&gt;com.github.obsidian-framework&lt;/groupId&gt;
+                    <div class="text-red-400 text-xs uppercase tracking-widest mb-2">Dependency</div>
+                    <pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;com.obsidian-java&lt;/groupId&gt;
     &lt;artifactId&gt;core&lt;/artifactId&gt;
-    &lt;version&gt;latest&lt;/version&gt;
+    &lt;version&gt;{version}&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
-                    </div>
                     <p class="text-gray-600 text-xs mt-2">The skeleton already includes this — you only need to add it manually if you're starting from an empty project.</p>
                 </div>
             </div>
@@ -144,12 +127,9 @@ java -jar target/app.jar</code></pre>
             </div>
         </div>
     </section>
-
     <div class="flex items-center justify-between pt-8 border-t border-zinc-900 text-sm">
         <span class="text-gray-600">—</span>
         <a href="/docs/routing" class="text-gray-400 hover:text-white transition-colors">Routing →</a>
     </div>
-
 </div>
-
 {% endblock %}

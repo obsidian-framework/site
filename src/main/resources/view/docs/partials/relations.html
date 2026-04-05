@@ -1,0 +1,270 @@
+{% extends "view/layout/docs.html" %}
+{% block content %}
+<div class="space-y-16">
+    <section id="relations">
+        <h2 class="text-3xl font-bold text-white mb-2">Relations</h2>
+        <p class="text-gray-400 mb-8">Obsidian supports all common relation types. Relations are defined as methods on your model and return a relation object you can call <code class="text-red-400">.get()</code> or <code class="text-red-400">.first()</code> on. Eager loading via <code class="text-red-400">.with()</code> is supported on all types.</p>
+
+        <div class="space-y-8">
+
+            <!-- HasOne -->
+            <div>
+                <div class="text-gray-400 text-sm mb-3">HasOne</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">A model owns a single related record. The foreign key lives on the related table.</p>
+                    <pre><code class="language-java">@Table("users")
+public class User extends Model {
+
+    // Explicit FK
+    public HasOne&lt;Profile&gt; profile() {
+        return hasOne(Profile.class, "user_id");
+    }
+
+    // Convention: omit the FK if it follows {model}_id
+    public HasOne&lt;Profile&gt; profile() {
+        return hasOne(Profile.class);
+    }
+}
+
+// Usage
+Profile profile = user.profile().first();</code></pre>
+                </div>
+            </div>
+
+            <!-- HasMany -->
+            <div>
+                <div class="text-gray-400 text-sm mb-3">HasMany</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">A model owns multiple related records. The foreign key lives on the related table.</p>
+                    <pre><code class="language-java">@Table("users")
+public class User extends Model {
+
+    public HasMany&lt;Post&gt; posts() {
+        return hasMany(Post.class, "user_id");
+    }
+}
+
+// Retrieve
+List&lt;Post&gt; posts = user.posts().get();
+
+// Create a related record directly on the relation
+Post post = user.posts().create(Map.of(
+    "title",   "Hello world",
+    "content", "..."
+));</code></pre>
+                </div>
+            </div>
+
+            <!-- BelongsTo -->
+            <div>
+                <div class="text-gray-400 text-sm mb-3">BelongsTo</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">The inverse of <code class="text-red-400">HasOne</code> / <code class="text-red-400">HasMany</code>. The foreign key lives on this model's table.</p>
+                    <pre><code class="language-java">@Table("posts")
+public class Post extends Model {
+
+    public BelongsTo&lt;User&gt; author() {
+        return belongsTo(User.class, "user_id");
+    }
+}
+
+// Retrieve
+User author = post.author().first();
+
+// Associate / dissociate (does not save — call save() after)
+post.author().associate(user);
+post.save();
+
+post.author().dissociate();   // sets FK to null
+post.save();</code></pre>
+                </div>
+            </div>
+
+            <!-- BelongsToMany -->
+            <div>
+                <div class="text-gray-400 text-sm mb-3">BelongsToMany</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Many-to-many through a pivot table, with a full set of pivot management methods.</p>
+                    <pre><code class="language-java">@Table("users")
+public class User extends Model {
+
+    // Explicit pivot table and keys
+    public BelongsToMany&lt;Role&gt; roles() {
+        return belongsToMany(Role.class, "role_user", "user_id", "role_id");
+    }
+
+    // Convention: derives {parent}_id and {related}_id from class names
+    public BelongsToMany&lt;Role&gt; roles() {
+        return belongsToMany(Role.class, "role_user");
+    }
+}
+
+// Retrieve
+List&lt;Role&gt; roles = user.roles().get();
+
+// Attach / detach
+user.roles().attach(roleId);
+user.roles().attach(roleId, Map.of("granted_at", LocalDate.now()));
+user.roles().detach(roleId);
+user.roles().detachAll();
+
+// Bulk operations
+user.roles().attachMany(List.of(1, 2, 3));
+user.roles().detachMany(List.of(1, 2));
+
+// Sync — replaces the current pivot set with exactly these IDs
+user.roles().sync(List.of(1, 3, 5));
+
+// Toggle — attach if absent, detach if present
+user.roles().toggle(List.of(2, 4));
+
+// Update extra pivot columns
+user.roles().updatePivot(roleId, Map.of("granted_at", LocalDate.now()));
+
+// Read extra pivot columns
+List&lt;Role&gt; roles = user.roles().withPivot("granted_at").get();
+String grantedAt = (String) role.get("pivot_granted_at");</code></pre>
+                </div>
+            </div>
+
+            <!-- HasManyThrough -->
+            <div>
+                <div class="text-gray-400 text-sm mb-3">HasManyThrough</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Access distant records through an intermediate model. Example: <code class="text-red-400">Country</code> → <code class="text-red-400">User</code> → <code class="text-red-400">Post</code>.</p>
+                    <pre><code class="language-java">@Table("countries")
+public class Country extends Model {
+
+    public HasManyThrough&lt;Post&gt; posts() {
+        return hasManyThrough(
+            Post.class,   // final model
+            User.class,   // intermediate model
+            "country_id", // FK on users  (users.country_id)
+            "user_id",    // FK on posts  (posts.user_id)
+            "id",         // local key on Country
+            "id"          // local key on User
+        );
+    }
+
+    // Convention shorthand
+    public HasManyThrough&lt;Post&gt; posts() {
+        return hasManyThrough(Post.class, User.class);
+    }
+}
+
+List&lt;Post&gt; posts = country.posts().get();</code></pre>
+                </div>
+            </div>
+
+            <!-- Polymorphic -->
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Polymorphic relations</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Polymorphic relations let a single related table belong to multiple model types via two columns — by convention <code class="text-red-400">{name}_type</code> and <code class="text-red-400">{name}_id</code>.</p>
+
+                    <div class="space-y-6">
+                        <div>
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">MorphOne — polymorphic HasOne</div>
+                            <pre><code class="language-java">// images table: id, url, imageable_id, imageable_type
+
+@Table("users")
+public class User extends Model {
+    public MorphOne&lt;Image&gt; image() {
+        return morphOne(Image.class, "imageable");
+    }
+}
+
+@Table("teams")
+public class Team extends Model {
+    public MorphOne&lt;Image&gt; image() {
+        return morphOne(Image.class, "imageable");
+    }
+}
+
+Image img = user.image().first();</code></pre>
+                        </div>
+
+                        <div class="border-t border-zinc-800 pt-6">
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">MorphMany — polymorphic HasMany</div>
+                            <pre><code class="language-java">// comments table: id, body, commentable_id, commentable_type
+
+@Table("posts")
+public class Post extends Model {
+    public MorphMany&lt;Comment&gt; comments() {
+        return morphMany(Comment.class, "commentable");
+    }
+}
+
+@Table("videos")
+public class Video extends Model {
+    public MorphMany&lt;Comment&gt; comments() {
+        return morphMany(Comment.class, "commentable");
+    }
+}
+
+List&lt;Comment&gt; comments = post.comments().get();
+
+// Create with morph columns set automatically
+Comment c = post.comments().create(Map.of("body", "Great!"));</code></pre>
+                        </div>
+
+                        <div class="border-t border-zinc-800 pt-6">
+                            <div class="text-gray-500 text-xs uppercase tracking-widest mb-2">MorphTo — polymorphic inverse</div>
+                            <pre><code class="language-java">@Table("comments")
+public class Comment extends Model {
+
+    public MorphTo&lt;?&gt; commentable() {
+        return morphTo("commentable", Map.of(
+            "Post",  Post.class,
+            "Video", Video.class
+        ));
+    }
+}
+
+// Returns the parent model regardless of its type
+Model parent = comment.commentable().first();</code></pre>
+                            <p class="text-gray-500 text-xs mt-3">The <code class="text-red-400">morphMap</code> maps the string stored in <code class="text-red-400">commentable_type</code> (e.g. <code>"Post"</code>) to the corresponding model class. An unknown type throws a <code>RuntimeException</code> at runtime.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Eager loading -->
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Eager loading</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Load relations up front to avoid N+1 queries. Pass relation method names to <code class="text-red-400">.with()</code>:</p>
+                    <pre><code class="language-java">// 3 queries total: posts + authors + comments
+List&lt;Post&gt; posts = Model.query(Post.class)
+        .with("author", "comments")
+        .get();
+
+// Access — no additional query fired
+for (Post post : posts) {
+    User author            = post.author().first();
+    List&lt;Comment&gt; comments = post.comments().get();
+}
+
+// Works with all relation types
+List&lt;Comment&gt; comments = Model.query(Comment.class)
+        .with("commentable")
+        .get();</code></pre>
+                    <p class="text-gray-500 text-xs mt-3">Each eager-loaded relation issues exactly one query, using a <code>WHERE IN (...)</code> to load all related records at once.</p>
+                </div>
+            </div>
+
+            <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
+                <div class="text-blue-400 mb-2">💡 Convention over configuration</div>
+                <p class="text-gray-400 text-sm">All relation factory methods have a short form that derives key names from class names. <code class="text-red-400">hasMany(Post.class)</code> assumes <code class="text-red-400">user_id</code> on the <code>posts</code> table; <code class="text-red-400">belongsTo(User.class)</code> assumes <code class="text-red-400">user_id</code> on this model's table. Pass explicit key names whenever your schema differs.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <div class="flex items-center justify-between pt-8 border-t border-zinc-900 text-sm">
+        <a href="/docs/models" class="text-gray-400 hover:text-white transition-colors">← Models</a>
+        <a href="/docs/migrations" class="text-gray-400 hover:text-white transition-colors">Migrations →</a>
+    </div>
+
+</div>
+{% endblock %}

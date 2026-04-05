@@ -1,34 +1,37 @@
-<div live:id="{{ _id }}" class="max-w-3xl mx-auto bg-zinc-900 rounded-lg border border-zinc-800 p-6" xmlns:live="http://www.w3.org/1999/xhtml">
-    <h2 class="text-xl font-bold text-white mb-2">{{ question }}</h2>
-    <p class="text-gray-400 text-sm mb-6">{{ totalVotes }} vote{% if totalVotes != 1 %}s{% endif %} total</p>
+<div live:id="{{ _id }}" class="bg-zinc-950 border border-zinc-800 p-6 mb-4" xmlns:live="http://www.w3.org/1999/xhtml">
+    <p class="text-xs text-zinc-600 uppercase tracking-widest mb-6">Poll</p>
+    
+    <div class="mb-6">
+        <h2 class="text-lg font-bold text-white mb-1">{{ question }}</h2>
+        <p class="text-zinc-600 text-xs">{{ totalVotes }} vote{% if totalVotes != 1 %}s{% endif %} total</p>
+    </div>
     
     {% if not hasVoted %}
-        <!-- Voting interface -->
-        <div class="space-y-3">
+        <div class="grid gap-px bg-zinc-800">
             {% for entry in options.entrySet() %}
             <button 
                 live:click="vote('{{ entry.key }}')"
-                class="w-full px-4 py-3 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-blue-500 rounded text-white text-left transition"
+                class="bg-black px-6 py-4 text-left text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors text-sm group"
             >
+                <span class="text-red-500 text-sm group-hover:translate-x-1 inline-block transition-transform mr-2">→</span>
                 {{ entry.key }}
             </button>
             {% endfor %}
         </div>
     {% else %}
-        <!-- Results -->
-        <div class="space-y-4 mb-6">
+        <div class="space-y-5 mb-6">
             {% for entry in options.entrySet() %}
             <div>
-                <div class="flex justify-between mb-1">
-                    <span class="text-white {% if entry.key == selectedOption %}font-bold{% endif %}">
+                <div class="flex justify-between mb-2">
+                    <span class="text-sm {% if entry.key == selectedOption %}text-white font-bold{% else %}text-zinc-400{% endif %}">
                         {{ entry.key }}
-                        {% if entry.key == selectedOption %}✓{% endif %}
+                        {% if entry.key == selectedOption %}<span class="text-red-500 ml-1">←</span>{% endif %}
                     </span>
-                    <span class="text-gray-400">{{ entry.value }} ({{ percentages[entry.key] }}%)</span>
+                    <span class="text-zinc-600 text-xs">{{ entry.value }} ({{ percentages[entry.key] }}%)</span>
                 </div>
-                <div class="w-full bg-zinc-800 rounded-full h-2">
+                <div class="w-full bg-zinc-900 h-1">
                     <div 
-                        class="{% if entry.key == selectedOption %}bg-blue-600{% else %}bg-zinc-600{% endif %} h-2 rounded-full transition-all"
+                        class="{% if entry.key == selectedOption %}bg-red-500{% else %}bg-zinc-700{% endif %} h-1 transition-all"
                         style="width: {{ percentages[entry.key] }}%"
                     ></div>
                 </div>
@@ -36,20 +39,28 @@
             {% endfor %}
         </div>
         
-        <div class="bg-zinc-800 border border-zinc-700 rounded p-3 mb-4">
-            <div class="text-sm text-gray-400">Current leader:</div>
-            <div class="text-lg font-bold text-blue-400">{{ winner }}</div>
+        <div class="bg-black border border-zinc-800 p-4 mb-4 flex items-center justify-between">
+            <div>
+                <div class="text-xs text-zinc-600 uppercase tracking-widest">Current leader</div>
+                <div class="text-white font-bold">{{ winner }}</div>
+            </div>
+            <span class="text-red-500 animate-pulse-dot text-xs">●</span>
         </div>
         
         <button 
             live:click="reset" 
-            class="w-full px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-gray-300 rounded transition"
+            class="w-full border border-zinc-800 hover:border-zinc-600 text-zinc-400 hover:text-white font-bold text-xs uppercase tracking-widest px-6 py-3 transition-colors"
         >
             Vote again
         </button>
     {% endif %}
-    
-    <div live:loading style="display: none;" class="mt-4 text-center text-blue-400 text-sm">
-        Recording vote...
+
+    <!--
+    <div live:loading style="display: none;" class="mt-4 text-center">
+        <div class="inline-flex items-center gap-2 text-zinc-600">
+            <span class="text-red-500 animate-pulse-dot text-xs">●</span>
+            <span class="text-xs uppercase tracking-widest">Updating...</span>
+        </div>
     </div>
+    -->
 </div>

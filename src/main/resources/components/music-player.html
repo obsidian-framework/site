@@ -1,0 +1,45 @@
+<div live:id="{{ _id }}" class="bg-zinc-950 border border-zinc-800 p-6 mb-4">
+    <p class="text-xs text-zinc-600 uppercase tracking-widest mb-6">Music Player</p>
+
+    <div class="mb-4">
+        <div class="text-white font-bold">{{ currentTrack.title }}</div>
+        <div class="text-zinc-600 text-xs">Track {{ currentPosition }} of {{ trackList.size() }}</div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-px bg-zinc-800 mb-6">
+        <button
+                live:click="prev"
+                class="bg-black px-4 py-4 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors text-sm font-bold uppercase tracking-widest"
+        >⏮ Prev</button>
+        <button
+                live:click="togglePlay"
+                class="bg-black px-4 py-4 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors text-sm font-bold uppercase tracking-widest"
+        >{% if playing %}⏸ Pause{% else %}▶ Play{% endif %}</button>
+        <button
+                live:click="next"
+                class="bg-black px-4 py-4 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors text-sm font-bold uppercase tracking-widest"
+        >Next ⏭</button>
+    </div>
+
+    <div class="mt-6 space-y-px bg-zinc-800">
+        {% for track in trackList %}
+        <div class="flex items-center gap-3 px-4 py-3 bg-black hover:bg-zinc-900 transition-colors group
+            {% if track.id == current %}border-l-2 border-red-500{% endif %}">
+            <span class="text-xs {% if track.id == current %}text-red-500{% else %}text-zinc-700{% endif %}">
+                {% if track.id == current and playing %}●{% else %}{{ loop.index }}{% endif %}
+            </span>
+            <button
+                    live:click="select({{ track.id }})"
+                    class="flex-1 text-left text-sm {% if track.id == current %}text-white font-bold{% else %}text-zinc-400 group-hover:text-white{% endif %} transition-colors"
+            >{{ track.title }}</button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div live:loading class="mt-4 text-center" style="display:none;">
+        <div class="inline-flex items-center gap-2 text-zinc-600">
+            <span class="text-red-500 animate-pulse text-xs">●</span>
+            <span class="text-xs uppercase tracking-widest">Updating...</span>
+        </div>
+    </div>
+</div>

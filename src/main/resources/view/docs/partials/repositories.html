@@ -5,38 +5,214 @@
 
     <section id="repositories">
         <h2 class="text-3xl font-bold text-white mb-2">Repositories</h2>
-        <p class="text-gray-400 mb-8">Separate your data access logic from your controllers with the Repository pattern.</p>
+        <p class="text-gray-400 mb-8">Separate your data access logic from your controllers with the Repository pattern. Extend <code class="text-red-400">BaseRepository&lt;T&gt;</code> to get all common CRUD operations for free — no boilerplate required.</p>
 
         <div class="space-y-8">
 
             <div>
-                <div class="text-gray-400 text-sm mb-3">Create a repository</div>
+                <div class="text-gray-400 text-sm mb-3">Without BaseRepository vs with BaseRepository</div>
                 <div class="bg-zinc-950 border border-zinc-800 p-6">
-                    <pre><code class="language-java">@Repository
+                    <p class="text-gray-400 text-sm mb-4">Everything inside the <span class="text-red-400">without</span> block is already provided by <code class="text-red-400">BaseRepository</code> — you don't need to write it.</p>
+                    <div class="space-y-6">
+                        <div>
+                            <div class="text-red-400 text-xs uppercase tracking-widest mb-2">Without — lots of boilerplate</div>
+                            <pre><code class="language-java">@Repository
 public class ArticleRepository {
 
-    public LazyList&lt;Article&gt; findAll() {
-        return Article.findAll();
+    public Article findById(int id) {
+        return Model.find(Article.class, id);  // already in BaseRepository
     }
 
-    public LazyList&lt;Article&gt; findPublished() {
-        return Article.where("status = ?", 1);
+    public List&lt;Article&gt; findAll() {
+        return Model.all(Article.class);       // already in BaseRepository
     }
 
-    public LazyList&lt;Article&gt; findByAuthor(Integer userId) {
-        return Article.where("user_id = ?", userId);
+    public boolean save(Article article) {
+        return article.save();                 // already in BaseRepository
     }
 
-    public Article findById(Integer id) {
-        return Article.findById(id);
+    public boolean delete(int id) {
+        Article a = Model.find(Article.class, id);
+        if (a == null) return false;
+        return a.delete();                     // already in BaseRepository
+    }
+}</code></pre>
+                        </div>
+                        <div class="border-t border-zinc-800 pt-6">
+                            <div class="text-green-400 text-xs uppercase tracking-widest mb-2">With — only what's specific to your domain</div>
+                            <pre><code class="language-java">@Repository
+public class ArticleRepository extends BaseRepository&lt;Article&gt; {
+
+    public ArticleRepository() {
+        super(Article.class);
     }
 
-    public void create(String title, String content) {
-        Article article = new Article();
-        article.setTitle(title);
-        article.setContent(content);
-        article.setStatus(1);
-        article.saveIt();
+    // findById, findAll, save, delete, count, paginate... all inherited
+
+    // Only add what's specific to articles:
+    public List&lt;Article&gt; findPublished() {
+        return query().where("status", 1).orderByDesc("created_at").get();
+    }
+
+    public Optional&lt;Article&gt; findBySlug(String slug) {
+        return Optional.ofNullable(findBy("slug", slug));
+    }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Built-in methods</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <table class="w-full text-sm">
+                        <thead>
+                        <tr class="border-b border-zinc-800">
+                            <th class="text-left py-3 pr-6 text-white font-medium">Method</th>
+                            <th class="text-left py-3 text-white font-medium">Description</th>
+                        </tr>
+                        </thead>
+                        <tbody class="text-gray-400">
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">findAll()</td><td class="py-3">All records</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">findById(id)</td><td class="py-3">By primary key, or null</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">findByIdOrFail(id)</td><td class="py-3">By primary key, throws <code class="text-red-400">ModelNotFoundException</code></td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">findBy(column, value)</td><td class="py-3">First match on a column</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">findAllBy(column, value)</td><td class="py-3">All matches on a column</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">findMany(ids)</td><td class="py-3">Multiple records by primary key list</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">findByAttributes(map)</td><td class="py-3">First match on multiple columns (AND)</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">create(attributes)</td><td class="py-3">Insert and return new record</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">firstOrCreate(search, extra)</td><td class="py-3">Find or create</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">updateOrCreate(search, attributes)</td><td class="py-3">Find and update, or create if not found</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">update(id, attributes)</td><td class="py-3">Update by primary key</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">updateWhere(column, value, attributes)</td><td class="py-3">Bulk update by condition</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">delete(id)</td><td class="py-3">Delete by primary key</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">destroy(ids...)</td><td class="py-3">Delete multiple by primary key</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">deleteWhere(column, value)</td><td class="py-3">Bulk delete by condition</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">count()</td><td class="py-3">Total row count</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">countWhere(column, value)</td><td class="py-3">Count matching a condition</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">exists(id)</td><td class="py-3">Check existence by primary key</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">existsWhere(column, value)</td><td class="py-3">Check existence by condition</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">paginate(page, perPage)</td><td class="py-3">Paginated results (default 15 per page)</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">latest()</td><td class="py-3">All records ordered by <code>created_at DESC</code></td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">latest(limit)</td><td class="py-3">Last N records</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">oldest()</td><td class="py-3">All records ordered by <code>created_at ASC</code></td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">first()</td><td class="py-3">First record</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">pluck(column)</td><td class="py-3">Extract a single column as a list</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">pluckWhere(column, whereCol, whereVal)</td><td class="py-3">Pluck with a condition</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">max(column)</td><td class="py-3">Maximum value of a column</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">min(column)</td><td class="py-3">Minimum value of a column</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">sum(column)</td><td class="py-3">Sum of a column</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">avg(column)</td><td class="py-3">Average of a column</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">chunk(size, callback)</td><td class="py-3">Iterate all records in batches without loading the full table</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">chunkWhere(column, value, size, callback)</td><td class="py-3">Same as <code class="text-red-400">chunk</code> with a WHERE filter</td></tr>
+                        <tr class="border-b border-zinc-800"><td class="py-3 pr-6 text-red-400 font-mono">upsert(rows, uniqueKeys)</td><td class="py-3">Insert or update on conflict — updates all non-unique columns</td></tr>
+                        <tr><td class="py-3 pr-6 text-red-400 font-mono">upsert(rows, uniqueKeys, updateKeys)</td><td class="py-3">Insert or update on conflict — updates only specified columns</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Custom queries with query()</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Use <code class="text-red-400">query()</code> to start a builder scoped to your model for anything that goes beyond the built-ins:</p>
+                    <pre><code class="language-java">@Repository
+public class ArticleRepository extends BaseRepository&lt;Article&gt; {
+
+    public ArticleRepository() { super(Article.class); }
+
+    public Paginator&lt;Article&gt; paginatePublished(int page) {
+        return query()
+                .where("status", 1)
+                .orderByDesc("created_at")
+                .paginate(page, 15);
+    }
+
+    public List&lt;Article&gt; findByAuthorWithComments(int userId) {
+        return query()
+                .where("user_id", userId)
+                .with("comments", "author")
+                .get();
+    }
+
+    public List&lt;Article&gt; findRecentByCategory(int categoryId, int limit) {
+        return query()
+                .where("category_id", categoryId)
+                .where("status", 1)
+                .orderByDesc("created_at")
+                .limit(limit)
+                .get();
+    }
+}</code></pre>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">updateOrCreate</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Find the first record matching <code class="text-red-400">search</code> and update it with <code class="text-red-400">attributes</code>, or create a new one merging both if none is found.</p>
+                    <pre><code class="language-java">// Updates Alice's role if found, creates her if not
+User user = userRepo.updateOrCreate(
+    Map.of("email", "alice@example.com"),
+    Map.of("role", "admin", "active", 1)
+);</code></pre>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">chunk</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Process large tables without loading everything into memory. The callback receives one batch at a time.</p>
+                    <pre><code class="language-java">// Process all users 500 at a time
+userRepo.chunk(500, users -> {
+    users.forEach(u -> u.set("active", 1).save());
+});
+
+// Same with a WHERE filter
+userRepo.chunkWhere("role", "user", 200, users -> {
+    users.forEach(u -> notificationService.send(u));
+});</code></pre>
+                    <p class="text-gray-500 text-xs mt-3">Uses offset-based pagination internally. Avoid inserting or deleting rows in the same table during iteration — pages may shift.</p>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">upsert</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Insert multiple rows, updating on conflict. Uses dialect-specific syntax — <code class="text-red-400">ON DUPLICATE KEY UPDATE</code> on MySQL, <code class="text-red-400">ON CONFLICT DO UPDATE</code> on PostgreSQL and SQLite.</p>
+                    <pre><code class="language-java">List&lt;Map&lt;String, Object&gt;&gt; rows = List.of(
+    Map.of("email", "alice@example.com", "name", "Alice", "role", "admin"),
+    Map.of("email", "bob@example.com",   "name", "Bob",   "role", "user")
+);
+
+// Conflict on email — updates all non-unique columns on conflict
+userRepo.upsert(rows, List.of("email"));
+
+// Only update the role column on conflict
+userRepo.upsert(rows, List.of("email"), List.of("role"));</code></pre>
+                    <p class="text-gray-500 text-xs mt-3">The <code class="text-red-400">uniqueKeys</code> column must have a <code>UNIQUE</code> or <code>PRIMARY KEY</code> constraint in the database schema. SQLite requires version 3.24+.</p>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Injection in a controller</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">@Controller("/articles")
+public class ArticleController extends BaseController {
+
+    @GET("")
+    private Object index(ArticleRepository articles, Request req) {
+        int page = Integer.parseInt(req.queryParamOrDefault("page", "1"));
+        return render("articles/index.html", Map.of(
+            "articles", articles.paginatePublished(page)
+        ));
+    }
+
+    @GET("/:id")
+    private Object show(ArticleRepository articles, Request req) {
+        Article article = articles.findByIdOrFail(req.params("id"));
+        return render("articles/show.html", Map.of("article", article));
     }
 }</code></pre>
                 </div>
@@ -44,7 +220,7 @@ public class ArticleRepository {
 
             <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
                 <div class="text-blue-400 mb-2">💡 Best practice</div>
-                <p class="text-gray-400 text-sm">Use repositories for any data retrieval or persistence logic. It keeps your controllers clean and makes testing easier. Any class annotated with <code class="text-red-400">@Repository</code> is automatically available for injection via <code class="text-red-400">@Inject</code> or as a method parameter.</p>
+                <p class="text-gray-400 text-sm">Always extend <code class="text-red-400">BaseRepository</code>. Only add methods that are specific to your domain — everything else is already there. Any class annotated with <code class="text-red-400">@Repository</code> is automatically available for injection via <code class="text-red-400">@Inject</code> or as a controller method parameter.</p>
             </div>
 
         </div>

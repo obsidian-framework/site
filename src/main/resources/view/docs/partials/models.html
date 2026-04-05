@@ -5,14 +5,17 @@
 
     <section id="models">
         <h2 class="text-3xl font-bold text-white mb-2">Models</h2>
-        <p class="text-gray-400 mb-8">Models use <strong class="text-white">ActiveJDBC</strong>, a lightweight ORM that follows the ActiveRecord pattern. A model maps directly to a database table — no configuration needed.</p>
+        <p class="text-gray-400 mb-8">Models use Obsidian's <strong class="text-white">native ORM</strong>, which follows the ActiveRecord pattern. A model maps directly to a database table — no configuration needed beyond the class name.</p>
 
         <div class="space-y-8">
 
             <div>
                 <div class="text-gray-400 text-sm mb-3">Create a model</div>
                 <div class="bg-zinc-950 border border-zinc-800 p-6">
-                    <pre><code class="language-java">@Table("articles")
+                    <pre><code class="language-java">import com.obsidian.core.database.orm.model.Model;
+import com.obsidian.core.database.orm.model.Table;
+
+@Table("articles")
 public class Article extends Model {
 
     public String getTitle()   { return getString("title"); }
@@ -23,7 +26,22 @@ public class Article extends Model {
     public void setContent(String content) { set("content", content); }
     public void setStatus(Integer status)  { set("status", status); }
 }</code></pre>
-                    <p class="text-gray-500 text-xs mt-3">By convention, ActiveJDBC maps <code class="text-red-400">Article</code> to the <code class="text-red-400">articles</code> table automatically. Use <code class="text-red-400">@Table</code> to override when your table name doesn't follow the convention.</p>
+                    <p class="text-gray-500 text-xs mt-3">By convention, <code class="text-red-400">Article</code> maps to the <code class="text-red-400">articles</code> table automatically. Use <code class="text-red-400">@Table</code> to override when your table name doesn't follow the convention.</p>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Custom primary key</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">If your table uses a column other than <code class="text-red-400">id</code> as primary key, override <code class="text-red-400">primaryKey()</code>:</p>
+                    <pre><code class="language-java">@Table("game_users")
+public class User extends Model {
+
+    @Override
+    public String primaryKey() { return "UUID"; }
+
+    public String getUUID() { return getString("UUID"); }
+}</code></pre>
                 </div>
             </div>
 
@@ -34,16 +52,28 @@ public class Article extends Model {
 Article article = new Article();
 article.setTitle("My title");
 article.setContent("My content");
-article.saveIt();
+article.save();
 
-// Retrieve
-Article article              = Article.findById(1);
-LazyList&lt;Article&gt; articles  = Article.findAll();
-LazyList&lt;Article&gt; published = Article.where("status = ?", 1);
+// Retrieve by primary key
+Article article = Model.find(Article.class, 1);
+
+// Retrieve all
+List&lt;Article&gt; all = Model.all(Article.class);
+
+// Query with conditions
+List&lt;Article&gt; published = Model.query(Article.class)
+        .where("status", 1)
+        .orderBy("created_at", "DESC")
+        .get();
+
+// First match
+Article latest = Model.query(Article.class)
+        .orderByDesc("created_at")
+        .first();
 
 // Update
 article.setTitle("New title");
-article.saveIt();
+article.save();
 
 // Delete
 article.delete();</code></pre>
@@ -51,26 +81,155 @@ article.delete();</code></pre>
             </div>
 
             <div>
-                <div class="text-gray-400 text-sm mb-3">Relations</div>
+                <div class="text-gray-400 text-sm mb-3">QueryBuilder</div>
                 <div class="bg-zinc-950 border border-zinc-800 p-6">
-                    <pre><code class="language-java">public class Article extends Model {
+                    <p class="text-gray-400 text-sm mb-4">The fluent QueryBuilder supports the most common SQL patterns:</p>
+                    <pre><code class="language-java">// WHERE conditions
+Model.query(Article.class)
+        .where("status", 1)
+        .where("user_id", ">", 10)
+        .whereIn("category_id", List.of(1, 2, 3))
+        .whereBetween("views", 100, 1000)
+        .whereLike("title", "%java%")
+        .get();
 
-    // belongs to
-    public User getAuthor() {
-        return parent(User.class);
-    }
+// ORDER, LIMIT, OFFSET
+Model.query(Article.class)
+        .orderBy("created_at", "DESC")
+        .limit(10)
+        .offset(20)
+        .get();
 
-    // has many
-    public LazyList&lt;Comment&gt; getComments() {
-        return get(Comment.class, "article_id = ?", getId());
-    }
-}</code></pre>
+// Pagination
+Paginator&lt;Article&gt; page = Model.query(Article.class)
+        .orderByDesc("created_at")
+        .paginate(1, 15);  // page 1, 15 per page
+
+// Aggregates
+long count = Model.query(Article.class).where("status", 1).count();
+Object max  = Model.query(Article.class).max("views");
+
+// Check existence
+boolean exists = Model.query(Article.class).where("slug", slug).exists();</code></pre>
                 </div>
             </div>
 
-            <div class="bg-zinc-900 border border-zinc-800 p-6 rounded">
-                <div class="text-blue-400 mb-2">💡 ActiveJDBC documentation</div>
-                <p class="text-gray-400 text-sm">For the full list of query methods, callbacks, and associations, refer to the <a href="https://javalite.io/activejdbc" target="_blank" class="text-red-400 hover:underline">official ActiveJDBC documentation →</a></p>
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Relations</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <pre><code class="language-java">@Table("articles")
+public class Article extends Model {
+
+    // BelongsTo
+    public BelongsTo&lt;User&gt; author() {
+        return belongsTo(User.class, "user_id");
+    }
+
+    // HasMany
+    public HasMany&lt;Comment&gt; comments() {
+        return hasMany(Comment.class, "article_id");
+    }
+
+    // HasOne
+    public HasOne&lt;Thumbnail&gt; thumbnail() {
+        return hasOne(Thumbnail.class, "article_id");
+    }
+}
+
+// Access
+User author            = article.author().first();
+List&lt;Comment&gt; comments = article.comments().get();
+
+// Eager loading — avoids N+1
+List&lt;Article&gt; articles = Model.query(Article.class)
+        .with("author", "comments")
+        .get();</code></pre>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Soft deletes</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Enable soft deletes by overriding <code class="text-red-400">softDeletes()</code>. Deleted records are filtered out automatically — they are not permanently removed.</p>
+                    <pre><code class="language-java">@Table("articles")
+public class Article extends Model {
+
+    @Override
+    protected boolean softDeletes() { return true; }
+}
+
+article.delete();          // sets deleted_at, keeps the row
+article.restore();         // clears deleted_at
+article.forceDelete();     // permanently removes the row
+
+// Include soft-deleted records
+Model.query(Article.class).withTrashed().get();
+Model.query(Article.class).onlyTrashed().get();</code></pre>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Cache</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Add <code class="text-red-400">@Cacheable</code> to cache query results automatically. The cache is invalidated on every <code class="text-red-400">save()</code> and <code class="text-red-400">delete()</code>.</p>
+                    <pre><code class="language-java">@Cacheable(ttl = 300)   // 5 minutes — configurable per model
+@Table("staff_ranks")
+public class StaffRank extends Model { ... }
+
+// Manual flush when needed
+ModelCache.flush(StaffRank.class);</code></pre>
+                    <p class="text-gray-500 text-xs mt-3">Requires a cache driver to be configured. See the <a href="/docs/cache" class="text-red-400 hover:underline">Cache</a> section.</p>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Mass assignment</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Control which attributes can be mass-assigned via <code class="text-red-400">fill()</code>:</p>
+                    <pre><code class="language-java">@Table("articles")
+public class Article extends Model {
+
+    @Override
+    protected List&lt;String&gt; fillable() {
+        return List.of("title", "content", "status");
+    }
+}
+
+// Create from a map (e.g. request body)
+Article article = new Article();
+article.fill(Map.of("title", "Hello", "content", "World"));
+article.save();</code></pre>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-gray-400 text-sm mb-3">Observers</div>
+                <div class="bg-zinc-950 border border-zinc-800 p-6">
+                    <p class="text-gray-400 text-sm mb-4">Hook into the model lifecycle with an observer:</p>
+                    <pre><code class="language-java">public class ArticleObserver extends ModelObserver&lt;Article&gt; {
+
+    @Override
+    public boolean creating(Article article) {
+        article.set("slug", slugify(article.getTitle()));
+        return true;  // return false to cancel the operation
+    }
+
+    @Override
+    public void created(Article article) {
+        // notify, index, etc.
+    }
+}
+
+// Register in the model
+@Table("articles")
+public class Article extends Model {
+
+    @Override
+    protected ModelObserver&lt;Article&gt; observer() {
+        return new ArticleObserver();
+    }
+}</code></pre>
+                </div>
             </div>
 
         </div>
