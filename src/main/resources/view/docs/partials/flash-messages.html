@@ -16,11 +16,11 @@
 public Object login(Request req, Response res) {
     try {
         if (Auth.login(req.queryParams("username"), req.queryParams("password"), req)) {
-            return redirectWithFlash(req, res, "success", "Welcome back!", "/dashboard");
+            return redirectWithSuccess("Welcome back!", "/dashboard");
         }
-        return redirectWithFlash(req, res, "error", "Invalid credentials", "/login");
+        return redirectWithError("Invalid credentials", "/login");
     } catch (LoginLockedException e) {
-        return redirectWithFlash(req, res, "error", e.getMessage(), "/login");
+        return redirectWithError(e.getMessage(), "/login");
     }
 }</code></pre>
                 </div>
@@ -29,10 +29,10 @@ public Object login(Request req, Response res) {
             <div>
                 <div class="text-gray-400 text-sm mb-3">Available types</div>
                 <div class="bg-zinc-950 border border-zinc-800 p-6">
-                    <pre><code class="language-java">redirectWithFlash(req, res, "success", "Operation completed!", "/");
-redirectWithFlash(req, res, "error",   "Something went wrong",  "/");
-redirectWithFlash(req, res, "info",    "Check your email",      "/");
-redirectWithFlash(req, res, "warning", "Changes require restart", "/");</code></pre>
+                    <pre><code class="language-java">redirectWithSuccess("Operation completed!", "/");
+redirectWithError("Something went wrong",  "/");
+redirectWithInfo("Check your email",      "/");
+redirectWithWarning("Changes require restart", "/");</code></pre>
                 </div>
             </div>
 
